@@ -96,7 +96,7 @@ const AppLayout = () => {
 
         <div className="flex-1 min-h-screen">
           <div className="p-4">
-            <SidebarTrigger asChild>
+            <SidebarTrigger>
               <Button variant="outline" size="icon" className="md:hidden">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
