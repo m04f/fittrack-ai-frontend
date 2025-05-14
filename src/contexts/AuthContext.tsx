@@ -1,4 +1,3 @@
-
 import { createContext, useContext, useEffect, useState, ReactNode } from "react";
 import api from "@/services/api";
 import { useNavigate } from "react-router-dom";
@@ -26,8 +25,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     const checkAuthStatus = async () => {
       if (api.isAuthenticated()) {
         try {
+          console.log("Checking auth status...");
           const userData = await api.getUserInfo();
-          setUser(userData);
+          console.log("User data received:", userData);
+          setUser(userData as UserInfo);
         } catch (error) {
           console.error("Error fetching user data:", error);
           api.clearToken();
@@ -42,11 +43,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const login = async (username: string, password: string) => {
     setIsLoading(true);
     try {
+      console.log("Attempting login for:", username);
       await api.login(username, password);
+      console.log("Login successful, fetching user info...");
       const userData = await api.getUserInfo();
-      setUser(userData);
+      console.log("User data received after login:", userData);
+      setUser(userData as UserInfo);
       toast.success("Login successful!");
-      navigate("/dashboard");
+      
+      // Add a small delay before navigation to ensure state is updated
+      setTimeout(() => {
+        navigate("/dashboard");
+      }, 100);
     } catch (error) {
       console.error("Login error:", error);
       throw error;
@@ -86,6 +94,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       throw error;
     }
   };
+
+  console.log("Auth state:", { isAuthenticated: !!user, isLoading, user });
 
   return (
     <AuthContext.Provider

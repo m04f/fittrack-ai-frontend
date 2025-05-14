@@ -6,7 +6,10 @@ import { Skeleton } from "@/components/ui/skeleton";
 const RequireAuth = () => {
   const { isAuthenticated, isLoading } = useAuth();
 
+  console.log("RequireAuth state:", { isAuthenticated, isLoading });
+
   if (isLoading) {
+    console.log("Auth is loading, showing skeleton");
     return (
       <div className="flex items-center justify-center min-h-screen">
         <div className="w-full max-w-md space-y-4">
@@ -23,9 +26,11 @@ const RequireAuth = () => {
   }
 
   if (!isAuthenticated) {
+    console.log("Not authenticated, redirecting to login");
     return <Navigate to="/login" replace />;
   }
 
+  console.log("Authenticated, rendering protected content");
   return <Outlet />;
 };
 

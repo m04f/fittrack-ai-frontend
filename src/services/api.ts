@@ -1,4 +1,3 @@
-
 import { toast } from "sonner";
 import { 
   AuthResponse, 
@@ -47,12 +46,16 @@ class ApiService {
     };
 
     try {
+      console.log(`API Request: ${options.method || 'GET'} ${url}`);
+      
       const response = await fetch(url, {
         ...options,
         headers,
         // Add credentials to handle cookies if needed
         credentials: 'include',
       });
+
+      console.log(`API Response: ${response.status} for ${url}`);
 
       if (!response.ok) {
         const errorData = await response.json().catch(() => ({}));
@@ -66,6 +69,7 @@ class ApiService {
           errorMessage = `${firstError[0]}: ${firstError[1]}`;
         }
 
+        console.error(`API Error (${response.status}):`, errorMessage);
         toast.error(errorMessage);
         throw new Error(errorMessage);
       }
@@ -74,7 +78,10 @@ class ApiService {
         return {} as T;
       }
 
-      return await response.json() as T;
+      // Parse JSON safely
+      const data = await response.json();
+      console.log(`API Data:`, data);
+      return data as T;
     } catch (error) {
       console.error("API request error:", error);
       throw error;
@@ -106,7 +113,14 @@ class ApiService {
   }
 
   async getUserInfo(): Promise<UserInfo> {
-    return this.request<UserInfo>("/user/");
+    try {
+      const data = await this.request<UserInfo>("/user/");
+      console.log("User info fetched successfully:", data);
+      return data;
+    } catch (error) {
+      console.error("Error fetching user info:", error);
+      throw error;
+    }
   }
 
   async updateUserInfo(data: Partial<UserInfo>): Promise<UserInfo> {
