@@ -12,7 +12,7 @@ import {
 } from "@/types/api";
 
 // API Configuration
-const API_BASE_URL = "/api";
+const API_BASE_URL = "http://localhost:8000/api";
 
 // API Service for making authenticated requests to the Django backend
 class ApiService {
@@ -49,6 +49,8 @@ class ApiService {
       const response = await fetch(url, {
         ...options,
         headers,
+        // Add credentials to handle cookies if needed
+        credentials: 'include',
       });
 
       if (!response.ok) {
