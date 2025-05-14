@@ -1,5 +1,15 @@
 
 import { toast } from "sonner";
+import { 
+  AuthResponse, 
+  LoginCredentials, 
+  RegistrationData, 
+  UserInfo,
+  WorkoutList,
+  Workout,
+  WorkoutRecord,
+  Plan
+} from "@/types/api";
 
 // API Configuration
 const API_BASE_URL = "/api";
@@ -61,7 +71,7 @@ class ApiService {
         return {} as T;
       }
 
-      return await response.json();
+      return await response.json() as T;
     } catch (error) {
       console.error("API request error:", error);
       throw error;
@@ -70,7 +80,7 @@ class ApiService {
 
   // Auth endpoints
   async login(username: string, password: string) {
-    const data = await this.request<{ auth_token: string }>("/auth/token/login/", {
+    const data = await this.request<AuthResponse>("/auth/token/login/", {
       method: "POST",
       body: JSON.stringify({ username, password }),
     });
@@ -79,25 +89,25 @@ class ApiService {
   }
 
   async register(username: string, email: string, password: string) {
-    return this.request("/auth/users/", {
+    return this.request<{ id: number }>("/auth/users/", {
       method: "POST",
       body: JSON.stringify({ username, email, password }),
     });
   }
 
   async logout() {
-    await this.request("/auth/token/logout/", {
+    await this.request<void>("/auth/token/logout/", {
       method: "POST",
     });
     this.clearToken();
   }
 
-  async getUserInfo() {
-    return this.request("/user/");
+  async getUserInfo(): Promise<UserInfo> {
+    return this.request<UserInfo>("/user/");
   }
 
-  async updateUserInfo(data: any) {
-    return this.request("/user/", {
+  async updateUserInfo(data: Partial<UserInfo>): Promise<UserInfo> {
+    return this.request<UserInfo>("/user/", {
       method: "PATCH",
       body: JSON.stringify(data),
     });
@@ -105,49 +115,49 @@ class ApiService {
 
   // Exercise endpoints
   async getExercises(params = "") {
-    return this.request(`/exercises/${params}`);
+    return this.request<any>(`/exercises/${params}`);
   }
 
   async getExercise(name: string) {
-    return this.request(`/exercises/${name}`);
+    return this.request<any>(`/exercises/${name}`);
   }
 
   // Workout endpoints
   async getWorkouts() {
-    return this.request("/workouts/");
+    return this.request<WorkoutList>("/workouts/");
   }
 
   async getWorkout(uuid: string) {
-    return this.request(`/workouts/${uuid}/`);
+    return this.request<Workout>(`/workouts/${uuid}/`);
   }
 
   async createWorkout(data: any) {
-    return this.request("/workouts/", {
+    return this.request<Workout>("/workouts/", {
       method: "POST",
       body: JSON.stringify(data),
     });
   }
 
   async updateWorkout(uuid: string, data: any) {
-    return this.request(`/workouts/${uuid}/`, {
+    return this.request<Workout>(`/workouts/${uuid}/`, {
       method: "PUT",
       body: JSON.stringify(data),
     });
   }
 
   async deleteWorkout(uuid: string) {
-    return this.request(`/workouts/${uuid}/`, {
+    return this.request<void>(`/workouts/${uuid}/`, {
       method: "DELETE",
     });
   }
 
   // Records endpoints
   async getWorkoutRecords() {
-    return this.request("/user/workouts/");
+    return this.request<{ results: WorkoutRecord[]; count: number; next: string | null; previous: string | null }>("/user/workouts/");
   }
 
   async createWorkoutRecord(data: any) {
-    return this.request("/user/workouts/", {
+    return this.request<WorkoutRecord>("/user/workouts/", {
       method: "POST",
       body: JSON.stringify(data),
     });
@@ -155,28 +165,28 @@ class ApiService {
 
   // Plan endpoints
   async getPlans() {
-    return this.request("/plans/");
+    return this.request<{ results: Plan[]; count: number; next: string | null; previous: string | null }>("/plans/");
   }
 
   async getPlan(uuid: string) {
-    return this.request(`/plans/${uuid}/`);
+    return this.request<Plan>(`/plans/${uuid}/`);
   }
 
   async getUserPlans() {
-    return this.request("/user/plans/");
+    return this.request<any>("/user/plans/");
   }
 
   // Chat endpoints
   async getChatSessions() {
-    return this.request("/chat/sessions/");
+    return this.request<{ results: ChatSession[]; count: number; next: string | null; previous: string | null }>("/chat/sessions/");
   }
 
   async getChatSession(uuid: string) {
-    return this.request(`/chat/sessions/${uuid}/`);
+    return this.request<DetailedChatSession>(`/chat/sessions/${uuid}/`);
   }
 
   async createChatSession(title: string) {
-    return this.request("/chat/sessions/", {
+    return this.request<ChatSession>("/chat/sessions/", {
       method: "POST",
       body: JSON.stringify({ title }),
     });

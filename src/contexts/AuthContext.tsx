@@ -76,12 +76,11 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     navigate("/login");
   };
 
-  const updateUserInfo = async (data: Partial<UserInfo>) => {
+  const updateUserInfo = async (data: Partial<UserInfo>): Promise<void> => {
     try {
       const updatedUser = await api.updateUserInfo(data);
       setUser(updatedUser);
       toast.success("Profile updated successfully!");
-      return updatedUser;
     } catch (error) {
       console.error("Error updating user info:", error);
       throw error;

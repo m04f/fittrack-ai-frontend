@@ -25,7 +25,7 @@ const Dashboard = () => {
           api.getWorkouts()
         ]);
         setWorkoutRecords(recordsData.results || []);
-        setRecentWorkouts(workoutsData.results?.slice(0, 5) || []);
+        setRecentWorkouts((workoutsData.results?.slice(0, 5) || []) as Workout[]);
       } catch (error) {
         console.error("Error fetching dashboard data:", error);
       } finally {

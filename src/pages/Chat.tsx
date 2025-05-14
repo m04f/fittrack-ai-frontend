@@ -54,7 +54,8 @@ const ChatPage = () => {
     try {
       const newSession = await api.createChatSession("New Chat");
       setChatSessions(prevSessions => [newSession, ...prevSessions]);
-      setCurrentSession(await api.getChatSession(newSession.uuid));
+      const sessionData = await api.getChatSession(newSession.uuid);
+      setCurrentSession(sessionData);
       toast.success("New chat session created");
     } catch (error) {
       console.error("Error creating chat session:", error);

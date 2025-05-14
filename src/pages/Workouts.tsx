@@ -22,8 +22,9 @@ const WorkoutsPage = () => {
       setLoading(true);
       try {
         const data = await api.getWorkouts();
-        setWorkouts(data.results || []);
-        setFilteredWorkouts(data.results || []);
+        const workoutsList = data.results || [];
+        setWorkouts(workoutsList);
+        setFilteredWorkouts(workoutsList);
       } catch (error) {
         console.error("Error fetching workouts:", error);
       } finally {

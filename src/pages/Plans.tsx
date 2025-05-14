@@ -21,8 +21,9 @@ const PlansPage = () => {
       setLoading(true);
       try {
         const data = await api.getPlans();
-        setPlans(data.results || []);
-        setFilteredPlans(data.results || []);
+        const plansList = data.results || [];
+        setPlans(plansList);
+        setFilteredPlans(plansList);
       } catch (error) {
         console.error("Error fetching plans:", error);
       } finally {
