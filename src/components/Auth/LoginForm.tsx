@@ -7,6 +7,7 @@ import { Label } from "@/components/ui/label";
 import { useAuth } from "@/contexts/AuthContext";
 import { Link } from "react-router-dom";
 import { Dumbbell } from "lucide-react";
+import { toast } from "sonner";
 
 const LoginForm = () => {
   const [username, setUsername] = useState("");
@@ -19,7 +20,9 @@ const LoginForm = () => {
     setIsSubmitting(true);
     try {
       await login(username, password);
+      // Success toast is handled in the AuthContext
     } catch (error) {
+      // Error toast is already handled in the API service
       console.error("Login failed:", error);
     } finally {
       setIsSubmitting(false);
