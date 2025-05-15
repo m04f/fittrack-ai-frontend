@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -7,20 +7,28 @@ import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { Input } from "@/components/ui/input";
-import { ArrowLeft, Clock, Dumbbell, Check, Plus, Weight } from "lucide-react";
+import { ArrowLeft, Clock, Dumbbell, Check, Plus, Weight, Timer, Repeat } from "lucide-react";
 import api from "@/services/api";
 import { Workout, WorkoutExercise, WorkoutRecord, ExerciseRecord } from "@/types/api";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
+import { Progress } from "@/components/ui/progress";
 
 const WorkoutRecordDetail = () => {
   const { id } = useParams<{ id: string }>();
   const [workoutRecord, setWorkoutRecord] = useState<WorkoutRecord | null>(null);
   const [workout, setWorkout] = useState<Workout | null>(null);
   const [exerciseRecords, setExerciseRecords] = useState<ExerciseRecord[]>([]);
+  const [completedSets, setCompletedSets] = useState<ExerciseRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const navigate = useNavigate();
+  
+  // Rest timer state
+  const [restTimerActive, setRestTimerActive] = useState(false);
+  const [restTimeRemaining, setRestTimeRemaining] = useState(0);
+  const [activeExerciseIndex, setActiveExerciseIndex] = useState<number | null>(null);
+  const timerInterval = useRef<number | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -35,11 +43,16 @@ const WorkoutRecordDetail = () => {
         // Fetch the related workout data
         const workoutData = await api.getWorkout(recordData.workout);
         setWorkout(workoutData);
+
+        // Get already completed sets from the record
+        if (recordData.exercises && recordData.exercises.length > 0) {
+          setCompletedSets(recordData.exercises);
+        }
         
         // Initialize exercise records based on workout exercises
         if (workoutData.exercises && workoutData.exercises.length > 0) {
           const initialExercises = workoutData.exercises.map(ex => ({
-            uuid: "",  // Will be set when saved
+            uuid: "",
             exercise: ex.exercise,
             reps: ex.reps || null,
             weight: ex.weight || null,
@@ -62,6 +75,29 @@ const WorkoutRecordDetail = () => {
 
     fetchData();
   }, [id]);
+
+  // Rest timer effect
+  useEffect(() => {
+    if (restTimerActive && restTimeRemaining > 0) {
+      timerInterval.current = window.setInterval(() => {
+        setRestTimeRemaining(prev => {
+          if (prev <= 1) {
+            clearInterval(timerInterval.current as number);
+            setRestTimerActive(false);
+            toast.success("Rest time completed!");
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    }
+
+    return () => {
+      if (timerInterval.current) {
+        clearInterval(timerInterval.current);
+      }
+    };
+  }, [restTimerActive, restTimeRemaining]);
 
   const handleExerciseChange = (index: number, field: keyof ExerciseRecord, value: any) => {
     const updatedExercises = [...exerciseRecords];
@@ -90,20 +126,22 @@ const WorkoutRecordDetail = () => {
         duration: exerciseToAdd.duration
       };
       
-      await api.createExerciseRecord(exerciseData);
+      const response = await api.createExerciseRecord(exerciseData);
       
-      // Update UI to show this exercise was added
-      const updatedExercises = [...exerciseRecords];
-      updatedExercises[index] = {
-        ...updatedExercises[index],
-        saved: true
-      };
-      setExerciseRecords(updatedExercises);
+      // Add the new set to completed sets
+      setCompletedSets(prev => [...prev, { ...response, saved: true }]);
       
-      toast.success(`${exerciseToAdd.exercise} added to your workout`);
+      toast.success(`${exerciseToAdd.exercise} set added successfully`);
+      
+      // Start rest timer if rest is specified
+      if (exerciseToAdd.rest && exerciseToAdd.rest > 0) {
+        setRestTimeRemaining(exerciseToAdd.rest);
+        setRestTimerActive(true);
+        setActiveExerciseIndex(index);
+      }
     } catch (error) {
       console.error("Error adding exercise:", error);
-      toast.error("Failed to add exercise");
+      toast.error("Failed to add exercise set");
     } finally {
       setSaving(false);
     }
@@ -112,6 +150,18 @@ const WorkoutRecordDetail = () => {
   const handleCompleteWorkout = () => {
     toast.success("Workout completed!");
     navigate("/workouts");
+  };
+
+  // Format time for the rest timer display
+  const formatTime = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+  };
+
+  // Get all completed sets for a specific exercise
+  const getCompletedSetsForExercise = (exerciseName: string) => {
+    return completedSets.filter(set => set.exercise === exerciseName);
   };
 
   if (loading) {
@@ -140,6 +190,32 @@ const WorkoutRecordDetail = () => {
         <h1 className="text-3xl font-bold tracking-tight">Recording: {workout?.name}</h1>
       </div>
 
+      {restTimerActive && (
+        <Card className="border-l-4 border-l-fitness-600">
+          <CardContent className="pt-6">
+            <div className="flex flex-col gap-4">
+              <div className="flex justify-between items-center">
+                <div className="flex items-center gap-2">
+                  <Timer className="h-5 w-5 text-fitness-600" />
+                  <span className="font-medium">Resting for {formatTime(restTimeRemaining)}</span>
+                </div>
+                <Button 
+                  variant="outline" 
+                  size="sm"
+                  onClick={() => {
+                    clearInterval(timerInterval.current as number);
+                    setRestTimerActive(false);
+                  }}
+                >
+                  Skip
+                </Button>
+              </div>
+              <Progress value={(restTimeRemaining / (exerciseRecords[activeExerciseIndex as number]?.rest || 1)) * 100} className="h-2" />
+            </div>
+          </CardContent>
+        </Card>
+      )}
+
       <Card>
         <CardHeader>
           <CardTitle>Exercise Progress</CardTitle>
@@ -158,83 +234,101 @@ const WorkoutRecordDetail = () => {
               </TableRow>
             </TableHeader>
             <TableBody>
-              {exerciseRecords.map((exercise, index) => (
-                <TableRow key={`${exercise.exercise}-${index}`}>
-                  <TableCell className="font-medium">{exercise.exercise}</TableCell>
-                  <TableCell>
-                    <Input 
-                      type="number"
-                      min="0"
-                      className="w-20"
-                      value={exercise.reps || ""}
-                      onChange={(e) => handleExerciseChange(
-                        index, 
-                        'reps', 
-                        e.target.value ? parseInt(e.target.value) : null
+              {exerciseRecords.map((exercise, index) => {
+                const exerciseSets = getCompletedSetsForExercise(exercise.exercise);
+                
+                return (
+                  <TableRow key={`${exercise.exercise}-${index}`} className={activeExerciseIndex === index && restTimerActive ? "bg-muted/30" : ""}>
+                    <TableCell>
+                      <div className="font-medium">
+                        {exercise.exercise}
+                        {exerciseSets.length > 0 && (
+                          <Badge variant="outline" className="ml-2">
+                            <Repeat className="mr-1 h-3 w-3" /> 
+                            {exerciseSets.length} {exerciseSets.length === 1 ? 'set' : 'sets'}
+                          </Badge>
+                        )}
+                      </div>
+                      
+                      {exerciseSets.length > 0 && (
+                        <div className="mt-2 text-xs text-muted-foreground">
+                          {exerciseSets.map((set, idx) => (
+                            <div key={set.uuid || idx} className="mt-1 flex items-center gap-x-2">
+                              <span>Set {idx + 1}:</span>
+                              {set.reps && <span>{set.reps} reps</span>}
+                              {set.weight && <span>{set.weight} kg</span>}
+                              {set.duration && <span>{set.duration} sec</span>}
+                            </div>
+                          ))}
+                        </div>
                       )}
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <Input 
-                      type="number"
-                      min="0"
-                      step="0.5"
-                      className="w-20"
-                      value={exercise.weight || ""}
-                      onChange={(e) => handleExerciseChange(
-                        index, 
-                        'weight', 
-                        e.target.value ? parseFloat(e.target.value) : null
-                      )}
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <Input 
-                      type="number"
-                      min="0"
-                      className="w-20"
-                      value={exercise.duration || ""}
-                      onChange={(e) => handleExerciseChange(
-                        index, 
-                        'duration', 
-                        e.target.value ? parseInt(e.target.value) : null
-                      )}
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <Input 
-                      type="number"
-                      min="0"
-                      className="w-20"
-                      value={exercise.rest || ""}
-                      onChange={(e) => handleExerciseChange(
-                        index, 
-                        'rest', 
-                        e.target.value ? parseInt(e.target.value) : null
-                      )}
-                    />
-                  </TableCell>
-                  <TableCell>
-                    <Button
-                      size="sm"
-                      onClick={() => handleAddExercise(index)}
-                      disabled={saving || exercise.saved}
-                      variant={exercise.saved ? "outline" : "default"}
-                      className={exercise.saved ? "bg-green-100 text-green-800 hover:bg-green-100" : "bg-fitness-600 hover:bg-fitness-700"}
-                    >
-                      {exercise.saved ? (
-                        <>
-                          <Check className="mr-1 h-4 w-4" /> Added
-                        </>
-                      ) : (
-                        <>
-                          <Plus className="mr-1 h-4 w-4" /> Add Set
-                        </>
-                      )}
-                    </Button>
-                  </TableCell>
-                </TableRow>
-              ))}
+                    </TableCell>
+                    <TableCell>
+                      <Input 
+                        type="number"
+                        min="0"
+                        className="w-20"
+                        value={exercise.reps || ""}
+                        onChange={(e) => handleExerciseChange(
+                          index, 
+                          'reps', 
+                          e.target.value ? parseInt(e.target.value) : null
+                        )}
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <Input 
+                        type="number"
+                        min="0"
+                        step="0.5"
+                        className="w-20"
+                        value={exercise.weight || ""}
+                        onChange={(e) => handleExerciseChange(
+                          index, 
+                          'weight', 
+                          e.target.value ? parseFloat(e.target.value) : null
+                        )}
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <Input 
+                        type="number"
+                        min="0"
+                        className="w-20"
+                        value={exercise.duration || ""}
+                        onChange={(e) => handleExerciseChange(
+                          index, 
+                          'duration', 
+                          e.target.value ? parseInt(e.target.value) : null
+                        )}
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <Input 
+                        type="number"
+                        min="0"
+                        className="w-20"
+                        value={exercise.rest || ""}
+                        onChange={(e) => handleExerciseChange(
+                          index, 
+                          'rest', 
+                          e.target.value ? parseInt(e.target.value) : null
+                        )}
+                      />
+                    </TableCell>
+                    <TableCell>
+                      <Button
+                        size="sm"
+                        onClick={() => handleAddExercise(index)}
+                        disabled={saving || (activeExerciseIndex !== null && restTimerActive)}
+                        className="bg-fitness-600 hover:bg-fitness-700"
+                      >
+                        <Plus className="mr-1 h-4 w-4" /> Add Set
+                      </Button>
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
             </TableBody>
           </Table>
         </CardContent>

@@ -1,3 +1,4 @@
+
 // API Types for the fitness app
 
 // Auth Types
@@ -91,6 +92,7 @@ export interface ExerciseRecord {
   datetime: string;
   rest?: number | null;
   duration?: number | null;
+  saved?: boolean;  // Added for UI tracking of saved sets
 }
 
 export interface WorkoutRecord {
