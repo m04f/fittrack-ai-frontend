@@ -1,6 +1,5 @@
-
 import { useEffect, useState } from "react";
-import { useParams, Link } from "react-router-dom";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
@@ -9,7 +8,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { ArrowLeft, Clock, Dumbbell, Play, Edit, Share, Weight } from "lucide-react";
 import api from "@/services/api";
-import { Workout, WorkoutExercise } from "@/types/api";
+import { Workout, WorkoutExercise, WorkoutRecord } from "@/types/api";
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
 
@@ -17,6 +16,8 @@ const WorkoutDetail = () => {
   const { id } = useParams<{ id: string }>();
   const [workout, setWorkout] = useState<Workout | null>(null);
   const [loading, setLoading] = useState(true);
+  const [startingWorkout, setStartingWorkout] = useState(false);
+  const navigate = useNavigate();
 
   useEffect(() => {
     const fetchWorkout = async () => {
@@ -46,6 +47,30 @@ const WorkoutDetail = () => {
     }
     
     return `${minutes} min${remainingSeconds > 0 ? ` ${remainingSeconds} sec` : ''}`;
+  };
+
+  const handleStartWorkout = async () => {
+    if (!workout) return;
+    
+    setStartingWorkout(true);
+    try {
+      const workoutRecord = await api.createWorkoutRecord({
+        workout: workout.uuid,
+        planday: null
+      });
+      
+      toast.success("Workout started successfully!");
+      // In a real app, you would navigate to a workout tracking page
+      console.log("Created workout record:", workoutRecord);
+      
+      // For now, we'll just show a success message
+      // In the future, you would navigate to a page where the user can track their exercises
+    } catch (error) {
+      console.error("Error starting workout:", error);
+      toast.error("Failed to start workout");
+    } finally {
+      setStartingWorkout(false);
+    }
   };
 
   const totalDuration = workout ? workout.total_duration : 0;
@@ -109,8 +134,13 @@ const WorkoutDetail = () => {
           </div>
 
           <div className="flex flex-wrap gap-2">
-            <Button className="bg-fitness-600 hover:bg-fitness-700">
-              <Play className="mr-2 h-4 w-4" /> Start Workout
+            <Button 
+              className="bg-fitness-600 hover:bg-fitness-700"
+              onClick={handleStartWorkout}
+              disabled={startingWorkout}
+            >
+              <Play className="mr-2 h-4 w-4" /> 
+              {startingWorkout ? "Starting..." : "Start Workout"}
             </Button>
             <Button variant="outline">
               <Edit className="mr-2 h-4 w-4" /> Edit Workout

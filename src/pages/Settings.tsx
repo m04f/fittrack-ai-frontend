@@ -14,10 +14,12 @@ import api from "@/services/api";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Separator } from "@/components/ui/separator";
 import { useAuth } from "@/contexts/AuthContext";
+import { useTheme } from "@/contexts/ThemeContext";
 import { toast } from "sonner";
 
 const SettingsPage = () => {
   const { logout, user, updateUserInfo } = useAuth();
+  const { isDarkMode, toggleDarkMode } = useTheme();
   const [isLoading, setIsLoading] = useState(false);
 
   const [notificationSettings, setNotificationSettings] = useState(
@@ -31,7 +33,7 @@ const SettingsPage = () => {
 
   const [displaySettings, setDisplaySettings] = useState(
     user?.frontend_settings?.displaySettings || {
-      darkMode: false,
+      darkMode: isDarkMode,
       compactView: false,
       showMetricUnits: true,
     },
@@ -47,17 +49,24 @@ const SettingsPage = () => {
   };
 
   const handleDisplayChange = (setting: keyof typeof displaySettings) => {
-    setDisplaySettings((prev) => ({
-      ...prev,
-      [setting]: !prev[setting],
-    }));
+    if (setting === "darkMode") {
+      toggleDarkMode();
+    } else {
+      setDisplaySettings((prev) => ({
+        ...prev,
+        [setting]: !prev[setting],
+      }));
+    }
   };
 
   const handleSaveSettings = () => {
     setIsLoading(true);
     const updatedSettings = {
       notificationSettings,
-      displaySettings,
+      displaySettings: {
+        ...displaySettings,
+        darkMode: isDarkMode,
+      },
     };
 
     api
@@ -117,7 +126,7 @@ const SettingsPage = () => {
                 </div>
                 <Switch
                   id="dark-mode"
-                  checked={displaySettings.darkMode}
+                  checked={isDarkMode}
                   onCheckedChange={() => handleDisplayChange("darkMode")}
                 />
               </div>
