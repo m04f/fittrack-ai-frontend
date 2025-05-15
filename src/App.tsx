@@ -18,6 +18,7 @@ import Chat from "./pages/Chat";
 import Profile from "./pages/Profile";
 import Settings from "./pages/Settings";
 import AppLayout from "./components/Layout/AppLayout";
+import PlanDetails from "./pages/PlanDetails";
 import RequireAuth from "./components/RequireAuth";
 import RedirectIfAuth from "./components/RedirectIfAuth";
 
@@ -44,6 +45,7 @@ const App = () => (
                 <Route path="/workouts/:id" element={<WorkoutDetail />} />
                 <Route path="/record" element={<RecordWorkout />} />
                 <Route path="/plans" element={<Plans />} />
+                <Route path="/plans/:planId" element={<PlanDetails />} />
                 <Route path="/chat" element={<Chat />} />
                 <Route path="/profile" element={<Profile />} />
                 <Route path="/settings" element={<Settings />} />
