@@ -96,20 +96,20 @@ const WorkoutsPage = () => {
             </span>
             <Separator orientation="vertical" className="mx-2 h-4" />
             <Dumbbell className="w-4 h-4 mr-2" />
-            <span>{workout.exercise_urls?.length || 0} exercises</span>
+            <span>{workout.exercise_names?.length || 0} exercises</span>
           </div>
           <div className="flex-1">
             <div className="mb-4">
               <h4 className="font-medium mb-2">Exercises:</h4>
               <ul className="text-sm text-muted-foreground">
-                {workout.exercise_urls.slice(0, 3).map((url, index) => (
+                {workout.exercise_names.slice(0, 3).map((name, index) => (
                   <li key={index} className="mb-1">
-                    {url}
+                    {name}
                   </li>
                 ))}
-                {workout.exercise_urls.length > 3 && (
+                {workout.exercise_names.length > 3 && (
                   <li className="italic">
-                    +{workout.exercise_urls.length - 3} more
+                    +{workout.exercise_names.length - 3} more
                   </li>
                 )}
               </ul>

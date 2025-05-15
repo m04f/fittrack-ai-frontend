@@ -75,7 +75,7 @@ export interface Workout {
   notes: string | null;
   public: boolean;
   exercises: WorkoutExercise[] | null;
-  exercise_urls: string[];
+  exercise_names: string[];
   total_duration: number;
 }
 
