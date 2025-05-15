@@ -11,6 +11,10 @@ export interface User {
   fullname: string;
 }
 
+export interface UpdateWorkoutRecordPayload {
+  duration: number; // Duration in seconds
+}
+
 export interface UserInfo extends User {
   bio: string | null;
   age: number | null;
@@ -100,6 +104,7 @@ export interface WorkoutRecord {
   workout: string;
   exercises: ExerciseRecord[];
   planday?: string | null;
+  duration?: number; // Duration in seconds
 }
 
 // Plan Types

@@ -1,4 +1,3 @@
-
 import { toast } from "sonner";
 import {
   AuthResponse,
@@ -10,6 +9,7 @@ import {
   WorkoutRecord,
   Plan,
   ExerciseRecord,
+  UpdateWorkoutRecordPayload,
 } from "@/types/api";
 
 // API Configuration
@@ -171,6 +171,13 @@ class ApiService {
   }
 
   // Records endpoints
+
+  async patchWorkoutRecord(uuid: string, data: UpdateWorkoutRecordPayload) {
+    return this.request<WorkoutRecord>(`/user/workouts/${uuid}/`, {
+      method: "PATCH",
+      body: JSON.stringify(data),
+    });
+  }
   async getWorkoutRecords() {
     return this.request<{
       results: WorkoutRecord[];

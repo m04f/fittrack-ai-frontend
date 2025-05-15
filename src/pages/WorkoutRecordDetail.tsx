@@ -220,10 +220,24 @@ const WorkoutRecordDetail = () => {
     }
   };
 
-  const handleCompleteWorkout = () => {
-    toast.success("Workout completed!");
-    navigate("/workouts");
-  };
+  const handleCompleteWorkout = async () => {
+      if (!workoutRecord || !workoutStartTime) {
+        toast.error("Unable to complete workout. Missing data.");
+        return;
+      }
+
+      const now = new Date();
+      const duration = Math.floor((now.getTime() - workoutStartTime.getTime()) / 1000);
+
+      try {
+        await api.patchWorkoutRecord(workoutRecord.uuid, { duration });
+        toast.success("Workout completed!");
+        navigate("/workouts");
+      } catch (error) {
+        console.error("Error updating workout duration:", error);
+        toast.error("Failed to update workout duration.");
+      }
+    };
 
   // Format time for the rest timer display
   const formatTime = (seconds: number) => {
