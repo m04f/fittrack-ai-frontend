@@ -1,4 +1,3 @@
-
 // API Types for the fitness app
 
 // Auth Types
@@ -104,7 +103,9 @@ export interface WorkoutRecord {
 // Plan Types
 export interface PlanWorkout {
   uuid: string;
+  name: string;
   workout: string;
+  workout_uuid: string;
   day: number;
   notes: string | null;
 }

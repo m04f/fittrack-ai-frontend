@@ -1,13 +1,13 @@
 import { toast } from "sonner";
-import { 
-  AuthResponse, 
-  LoginCredentials, 
-  RegistrationData, 
+import {
+  AuthResponse,
+  LoginCredentials,
+  RegistrationData,
   UserInfo,
   WorkoutList,
   Workout,
   WorkoutRecord,
-  Plan
+  Plan,
 } from "@/types/api";
 
 // API Configuration
@@ -46,13 +46,13 @@ class ApiService {
     };
 
     try {
-      console.log(`API Request: ${options.method || 'GET'} ${url}`);
-      
+      console.log(`API Request: ${options.method || "GET"} ${url}`);
+
       const response = await fetch(url, {
         ...options,
         headers,
         // Add credentials to handle cookies if needed
-        credentials: 'include',
+        credentials: "include",
       });
 
       console.log(`API Response: ${response.status} for ${url}`);
@@ -170,7 +170,12 @@ class ApiService {
 
   // Records endpoints
   async getWorkoutRecords() {
-    return this.request<{ results: WorkoutRecord[]; count: number; next: string | null; previous: string | null }>("/user/workouts/");
+    return this.request<{
+      results: WorkoutRecord[];
+      count: number;
+      next: string | null;
+      previous: string | null;
+    }>("/user/workouts/");
   }
 
   async createWorkoutRecord(data: any) {
@@ -182,7 +187,7 @@ class ApiService {
 
   // Plan endpoints
   async getPlans() {
-    return this.request<{ results: Plan[]; count: number; next: string | null; previous: string | null }>("/plans/");
+    return this.request<Plan[]>("/plans/");
   }
 
   async getPlan(uuid: string) {
@@ -195,7 +200,12 @@ class ApiService {
 
   // Chat endpoints
   async getChatSessions() {
-    return this.request<{ results: ChatSession[]; count: number; next: string | null; previous: string | null }>("/chat/sessions/");
+    return this.request<{
+      results: ChatSession[];
+      count: number;
+      next: string | null;
+      previous: string | null;
+    }>("/chat/sessions/");
   }
 
   async getChatSession(uuid: string) {
