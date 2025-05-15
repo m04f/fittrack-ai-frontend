@@ -70,7 +70,9 @@ export interface Workout {
   description: string | null;
   notes: string | null;
   public: boolean;
-  exercises: WorkoutExercise[];
+  exercises: WorkoutExercise[] | null;
+  exercise_urls: string[];
+  total_duration: number;
 }
 
 export interface WorkoutList {

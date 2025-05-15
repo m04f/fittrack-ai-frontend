@@ -1,11 +1,23 @@
-
 import { useEffect, useState } from "react";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Separator } from "@/components/ui/separator";
-import { Dumbbell, Search, Plus, Filter, ArrowRight, Clock } from "lucide-react";
+import {
+  Dumbbell,
+  Search,
+  Plus,
+  Filter,
+  ArrowRight,
+  Clock,
+} from "lucide-react";
 import api from "@/services/api";
 import { Workout } from "@/types/api";
 import { Link } from "react-router-dom";
@@ -22,7 +34,7 @@ const WorkoutsPage = () => {
       setLoading(true);
       try {
         const data = await api.getWorkouts();
-        const workoutsList = data.results || [];
+        const workoutsList = Array.isArray(data) ? data : [];
         setWorkouts(workoutsList);
         setFilteredWorkouts(workoutsList);
       } catch (error) {
@@ -37,9 +49,10 @@ const WorkoutsPage = () => {
 
   useEffect(() => {
     if (searchTerm) {
-      const filtered = workouts.filter((workout) => 
-        workout.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        workout.description?.toLowerCase().includes(searchTerm.toLowerCase())
+      const filtered = workouts.filter(
+        (workout) =>
+          workout.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+          workout.description?.toLowerCase().includes(searchTerm.toLowerCase()),
       );
       setFilteredWorkouts(filtered);
     } else {
@@ -62,7 +75,7 @@ const WorkoutsPage = () => {
                 {workout.description || "No description available"}
               </CardDescription>
             </div>
-            <Badge 
+            <Badge
               variant={workout.public ? "default" : "outline"}
               className={workout.public ? "bg-fitness-500" : ""}
             >
@@ -74,31 +87,38 @@ const WorkoutsPage = () => {
           <div className="flex items-center mb-4 text-sm text-muted-foreground">
             <Clock className="w-4 h-4 mr-2" />
             <span>
-              {workout.exercises.reduce((acc, ex) => {
-                const duration = ex.duration || 0;
-                const restTime = ex.rest * (ex.sets - 1);
-                return acc + duration * ex.sets + restTime;
-              }, 0)} seconds
+              {(() => {
+                const totalSeconds = workout.total_duration;
+                const minutes = Math.floor(totalSeconds / 60);
+                const seconds = totalSeconds % 60;
+                return `${minutes} min${seconds > 0 ? ` ${seconds} sec` : ""}`;
+              })()}
             </span>
             <Separator orientation="vertical" className="mx-2 h-4" />
             <Dumbbell className="w-4 h-4 mr-2" />
-            <span>{workout.exercises.length} exercises</span>
+            <span>{workout.exercise_urls?.length || 0} exercises</span>
           </div>
           <div className="flex-1">
             <div className="mb-4">
               <h4 className="font-medium mb-2">Exercises:</h4>
               <ul className="text-sm text-muted-foreground">
-                {workout.exercises.slice(0, 3).map((ex) => (
-                  <li key={ex.uuid} className="mb-1">{ex.exercise}</li>
+                {workout.exercise_urls.slice(0, 3).map((url, index) => (
+                  <li key={index} className="mb-1">
+                    {url}
+                  </li>
                 ))}
-                {workout.exercises.length > 3 && 
-                  <li className="italic">+{workout.exercises.length - 3} more</li>
-                }
+                {workout.exercise_urls.length > 3 && (
+                  <li className="italic">
+                    +{workout.exercise_urls.length - 3} more
+                  </li>
+                )}
               </ul>
             </div>
           </div>
           <div className="flex justify-between mt-auto items-center">
-            <span className="text-xs text-muted-foreground">Created by: {workout.creator}</span>
+            <span className="text-xs text-muted-foreground">
+              Created by: {workout.creator || "Unknown Creator"}
+            </span>
             <Button asChild size="sm" variant="outline">
               <Link to={`/workouts/${workout.uuid}`}>
                 View <ArrowRight className="ml-1 h-4 w-4" />
@@ -142,15 +162,17 @@ const WorkoutsPage = () => {
     <div className="animate-enter space-y-6">
       <div>
         <h1 className="text-3xl font-bold tracking-tight">Workout Library</h1>
-        <p className="text-muted-foreground">Browse and manage your workout routines</p>
+        <p className="text-muted-foreground">
+          Browse and manage your workout routines
+        </p>
       </div>
 
       <div className="flex flex-col sm:flex-row gap-4 justify-between">
         <div className="relative flex-1">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
-          <Input 
-            placeholder="Search workouts..." 
-            className="pl-9" 
+          <Input
+            placeholder="Search workouts..."
+            className="pl-9"
             value={searchTerm}
             onChange={handleSearch}
           />
@@ -181,7 +203,9 @@ const WorkoutsPage = () => {
                 <Dumbbell className="h-12 w-12 text-muted-foreground mb-4" />
                 <h3 className="text-lg font-medium">No workouts found</h3>
                 <p className="text-sm text-muted-foreground mt-1">
-                  {searchTerm ? "Try a different search term" : "Create your first workout to get started"}
+                  {searchTerm
+                    ? "Try a different search term"
+                    : "Create your first workout to get started"}
                 </p>
                 <Button className="mt-4 bg-fitness-600 hover:bg-fitness-700">
                   <Plus className="mr-2 h-4 w-4" />

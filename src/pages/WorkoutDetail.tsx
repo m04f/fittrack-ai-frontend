@@ -37,14 +37,6 @@ const WorkoutDetail = () => {
     fetchWorkout();
   }, [id]);
 
-  const getTotalDuration = (exercises: WorkoutExercise[]) => {
-    return exercises.reduce((total, ex) => {
-      const exerciseDuration = ex.duration || 0;
-      const restDuration = ex.rest * (ex.sets - 1);
-      return total + (exerciseDuration * ex.sets) + restDuration;
-    }, 0);
-  };
-
   const formatTime = (seconds: number) => {
     const minutes = Math.floor(seconds / 60);
     const remainingSeconds = seconds % 60;
@@ -56,7 +48,7 @@ const WorkoutDetail = () => {
     return `${minutes} min${remainingSeconds > 0 ? ` ${remainingSeconds} sec` : ''}`;
   };
 
-  const totalDuration = workout ? getTotalDuration(workout.exercises) : 0;
+  const totalDuration = workout ? workout.total_duration : 0;
 
   return (
     <div className="animate-enter space-y-6">
@@ -155,7 +147,7 @@ const WorkoutDetail = () => {
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {workout?.exercises.map((exercise, index) => (
+                      {workout?.exercises?.map((exercise, index) => (
                         <TableRow key={exercise.uuid}>
                           <TableCell>{index + 1}</TableCell>
                           <TableCell className="font-medium">{exercise.exercise}</TableCell>
