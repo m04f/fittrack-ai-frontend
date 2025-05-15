@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useRef } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import {
@@ -29,6 +30,7 @@ import {
   Weight,
   Timer,
   Repeat,
+  Activity,
 } from "lucide-react";
 import api from "@/services/api";
 import {
@@ -60,6 +62,11 @@ const WorkoutRecordDetail = () => {
     null,
   );
   const timerInterval = useRef<number | null>(null);
+  
+  // Workout progress tracking
+  const [workoutStartTime, setWorkoutStartTime] = useState<Date | null>(null);
+  const [elapsedTime, setElapsedTime] = useState(0);
+  const workoutTimerInterval = useRef<number | null>(null);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -96,6 +103,9 @@ const WorkoutRecordDetail = () => {
 
           setExerciseRecords(initialExercises);
         }
+        
+        // Initialize the workout timer
+        setWorkoutStartTime(new Date());
       } catch (error) {
         console.error("Error fetching workout record data:", error);
         toast.error("Failed to load workout record");
@@ -105,6 +115,13 @@ const WorkoutRecordDetail = () => {
     };
 
     fetchData();
+    
+    // Clean up timer on unmount
+    return () => {
+      if (workoutTimerInterval.current) {
+        clearInterval(workoutTimerInterval.current);
+      }
+    };
   }, [id]);
 
   // Rest timer effect
@@ -129,6 +146,23 @@ const WorkoutRecordDetail = () => {
       }
     };
   }, [restTimerActive, restTimeRemaining]);
+  
+  // Workout timer effect
+  useEffect(() => {
+    if (workoutStartTime) {
+      workoutTimerInterval.current = window.setInterval(() => {
+        const now = new Date();
+        const elapsed = Math.floor((now.getTime() - workoutStartTime.getTime()) / 1000);
+        setElapsedTime(elapsed);
+      }, 1000);
+    }
+
+    return () => {
+      if (workoutTimerInterval.current) {
+        clearInterval(workoutTimerInterval.current);
+      }
+    };
+  }, [workoutStartTime]);
 
   const handleExerciseChange = (
     index: number,
@@ -193,10 +227,45 @@ const WorkoutRecordDetail = () => {
     const secs = seconds % 60;
     return `${mins}:${secs < 10 ? "0" : ""}${secs}`;
   };
+  
+  // Format time for workout elapsed time (includes hours)
+  const formatElapsedTime = (seconds: number) => {
+    const hours = Math.floor(seconds / 3600);
+    const mins = Math.floor((seconds % 3600) / 60);
+    const secs = seconds % 60;
+    
+    if (hours > 0) {
+      return `${hours}h ${mins}m ${secs}s`;
+    } 
+    return `${mins}m ${secs}s`;
+  };
 
   // Get all completed sets for a specific exercise
   const getCompletedSetsForExercise = (exerciseName: string) => {
     return completedSets.filter((set) => set.exercise === exerciseName);
+  };
+  
+  // Calculate progress for individual exercise
+  const calculateExerciseProgress = (exerciseName: string) => {
+    if (!workout || !workout.exercises) return 0;
+    
+    const workoutExercise = workout.exercises.find(ex => ex.exercise === exerciseName);
+    if (!workoutExercise) return 0;
+    
+    const completedExerciseSets = completedSets.filter(set => set.exercise === exerciseName);
+    const targetSets = workoutExercise.sets || 1;
+    
+    return Math.min(100, Math.round((completedExerciseSets.length / targetSets) * 100));
+  };
+  
+  // Calculate overall workout progress
+  const calculateWorkoutProgress = () => {
+    if (!workout || !workout.exercises || workout.exercises.length === 0) return 0;
+    
+    const totalSets = workout.exercises.reduce((total, ex) => total + (ex.sets || 1), 0);
+    const completedSetsCount = completedSets.length;
+    
+    return Math.min(100, Math.round((completedSetsCount / totalSets) * 100));
   };
 
   if (loading) {
@@ -216,16 +285,37 @@ const WorkoutRecordDetail = () => {
 
   return (
     <div className="animate-enter space-y-6">
-      <div className="flex items-center gap-2">
-        <Button variant="outline" size="icon" asChild>
-          <Link to="/workouts">
-            <ArrowLeft className="h-4 w-4" />
-          </Link>
-        </Button>
-        <h1 className="text-3xl font-bold tracking-tight">
-          Recording: {workout?.name}
-        </h1>
+      <div className="flex items-center justify-between">
+        <div className="flex items-center gap-2">
+          <Button variant="outline" size="icon" asChild>
+            <Link to="/workouts">
+              <ArrowLeft className="h-4 w-4" />
+            </Link>
+          </Button>
+          <h1 className="text-3xl font-bold tracking-tight">
+            Recording: {workout?.name}
+          </h1>
+        </div>
+        <div className="flex items-center gap-2">
+          <Clock className="h-5 w-5 text-muted-foreground" />
+          <span className="font-medium">{formatElapsedTime(elapsedTime)}</span>
+        </div>
       </div>
+      
+      <Card>
+        <CardHeader className="pb-3">
+          <CardTitle className="flex items-center justify-between">
+            <div>Workout Progress</div>
+            <Badge variant="outline" className="ml-2">
+              {calculateWorkoutProgress()}% Complete
+            </Badge>
+          </CardTitle>
+          <CardDescription>
+            Track your overall workout completion
+          </CardDescription>
+          <Progress value={calculateWorkoutProgress()} className="h-2" />
+        </CardHeader>
+      </Card>
 
       {restTimerActive && (
         <Card className="border-l-4 border-l-fitness-600">
@@ -272,12 +362,12 @@ const WorkoutRecordDetail = () => {
           <Table>
             <TableHeader>
               <TableRow>
-                <TableHead>Exercise</TableHead>
+                <TableHead className="w-[300px]">Exercise</TableHead>
                 <TableHead>Reps</TableHead>
                 <TableHead>Weight (kg)</TableHead>
                 <TableHead>Duration (sec)</TableHead>
                 <TableHead>Rest (sec)</TableHead>
-
+                <TableHead>Effort</TableHead>
                 <TableHead>Action</TableHead>
               </TableRow>
             </TableHeader>
@@ -286,6 +376,7 @@ const WorkoutRecordDetail = () => {
                 const exerciseSets = getCompletedSetsForExercise(
                   exercise.exercise,
                 );
+                const exerciseProgress = calculateExerciseProgress(exercise.exercise);
 
                 return (
                   <TableRow
@@ -297,32 +388,33 @@ const WorkoutRecordDetail = () => {
                     }
                   >
                     <TableCell>
-                      <div className="font-medium">
-                        {exercise.exercise}
-                        {exerciseSets.length > 0 && (
+                      <div className="space-y-2">
+                        <div className="flex items-center justify-between">
+                          <div className="font-medium">{exercise.exercise}</div>
                           <Badge variant="outline" className="ml-2">
                             <Repeat className="mr-1 h-3 w-3" />
                             {exerciseSets.length}{" "}
                             {exerciseSets.length === 1 ? "set" : "sets"}
                           </Badge>
+                        </div>
+                        <Progress value={exerciseProgress} className="h-1" />
+
+                        {exerciseSets.length > 0 && (
+                          <div className="mt-2 text-xs text-muted-foreground">
+                            {exerciseSets.map((set, idx) => (
+                              <div
+                                key={set.uuid || idx}
+                                className="mt-1 flex items-center gap-x-2"
+                              >
+                                <span>Set {idx + 1}:</span>
+                                {set.reps && <span>{set.reps} reps</span>}
+                                {set.weight && <span>{set.weight} kg</span>}
+                                {set.duration && <span>{set.duration} sec</span>}
+                              </div>
+                            ))}
+                          </div>
                         )}
                       </div>
-
-                      {exerciseSets.length > 0 && (
-                        <div className="mt-2 text-xs text-muted-foreground">
-                          {exerciseSets.map((set, idx) => (
-                            <div
-                              key={set.uuid || idx}
-                              className="mt-1 flex items-center gap-x-2"
-                            >
-                              <span>Set {idx + 1}:</span>
-                              {set.reps && <span>{set.reps} reps</span>}
-                              {set.weight && <span>{set.weight} kg</span>}
-                              {set.duration && <span>{set.duration} sec</span>}
-                            </div>
-                          ))}
-                        </div>
-                      )}
                     </TableCell>
                     <TableCell>
                       <Input
