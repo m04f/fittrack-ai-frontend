@@ -1,4 +1,5 @@
 import { useEffect, useState } from "react";
+import { useSearchParams } from "react-router-dom";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -15,6 +16,8 @@ import { toast } from "sonner";
 const WorkoutDetail = () => {
   const { id } = useParams<{ id: string }>();
   const [workout, setWorkout] = useState<Workout | null>(null);
+  const [searchParams] = useSearchParams();
+  const planday = searchParams.get("planday");
   const [loading, setLoading] = useState(true);
   const [startingWorkout, setStartingWorkout] = useState(false);
   const navigate = useNavigate();
@@ -56,7 +59,7 @@ const WorkoutDetail = () => {
     try {
       const workoutRecord = await api.createWorkoutRecord({
         workout: workout.uuid,
-        planday: null
+        planday: planday || null
       });
       
       toast.success("Workout started successfully!");

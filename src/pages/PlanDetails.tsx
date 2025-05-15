@@ -75,7 +75,7 @@ const PlanDetails = () => {
                   key={workoutInfo.uuid}
                   className="p-2 border rounded-md text-center cursor-pointer hover:bg-fitness-100"
                   onClick={() =>
-                    (window.location.href = `/workouts/${workoutInfo.workout_uuid}`)
+                    (window.location.href = `/workouts/${workoutInfo.workout_uuid}?planday=${workoutInfo.uuid}`)
                   }
                 >
                   <span className="block font-medium">
