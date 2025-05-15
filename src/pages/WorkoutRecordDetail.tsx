@@ -1,4 +1,3 @@
-
 import { useState, useEffect, useRef } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import {
@@ -62,7 +61,7 @@ const WorkoutRecordDetail = () => {
     null,
   );
   const timerInterval = useRef<number | null>(null);
-  
+
   // Workout progress tracking
   const [workoutStartTime, setWorkoutStartTime] = useState<Date | null>(null);
   const [elapsedTime, setElapsedTime] = useState(0);
@@ -103,7 +102,7 @@ const WorkoutRecordDetail = () => {
 
           setExerciseRecords(initialExercises);
         }
-        
+
         // Initialize the workout timer
         setWorkoutStartTime(new Date());
       } catch (error) {
@@ -115,7 +114,7 @@ const WorkoutRecordDetail = () => {
     };
 
     fetchData();
-    
+
     // Clean up timer on unmount
     return () => {
       if (workoutTimerInterval.current) {
@@ -146,13 +145,15 @@ const WorkoutRecordDetail = () => {
       }
     };
   }, [restTimerActive, restTimeRemaining]);
-  
+
   // Workout timer effect
   useEffect(() => {
     if (workoutStartTime) {
       workoutTimerInterval.current = window.setInterval(() => {
         const now = new Date();
-        const elapsed = Math.floor((now.getTime() - workoutStartTime.getTime()) / 1000);
+        const elapsed = Math.floor(
+          (now.getTime() - workoutStartTime.getTime()) / 1000,
+        );
         setElapsedTime(elapsed);
       }, 1000);
     }
@@ -195,7 +196,10 @@ const WorkoutRecordDetail = () => {
         duration: exerciseToAdd.duration,
       };
 
-      const response = await api.createExerciseRecord(exerciseData);
+      const response = await api.createExerciseRecord(
+        exerciseData,
+        workoutRecord.uuid,
+      );
 
       // Add the new set to completed sets
       setCompletedSets((prev) => [...prev, { ...response, saved: true }]);
@@ -227,16 +231,16 @@ const WorkoutRecordDetail = () => {
     const secs = seconds % 60;
     return `${mins}:${secs < 10 ? "0" : ""}${secs}`;
   };
-  
+
   // Format time for workout elapsed time (includes hours)
   const formatElapsedTime = (seconds: number) => {
     const hours = Math.floor(seconds / 3600);
     const mins = Math.floor((seconds % 3600) / 60);
     const secs = seconds % 60;
-    
+
     if (hours > 0) {
       return `${hours}h ${mins}m ${secs}s`;
-    } 
+    }
     return `${mins}m ${secs}s`;
   };
 
@@ -244,27 +248,38 @@ const WorkoutRecordDetail = () => {
   const getCompletedSetsForExercise = (exerciseName: string) => {
     return completedSets.filter((set) => set.exercise === exerciseName);
   };
-  
+
   // Calculate progress for individual exercise
   const calculateExerciseProgress = (exerciseName: string) => {
     if (!workout || !workout.exercises) return 0;
-    
-    const workoutExercise = workout.exercises.find(ex => ex.exercise === exerciseName);
+
+    const workoutExercise = workout.exercises.find(
+      (ex) => ex.exercise === exerciseName,
+    );
     if (!workoutExercise) return 0;
-    
-    const completedExerciseSets = completedSets.filter(set => set.exercise === exerciseName);
+
+    const completedExerciseSets = completedSets.filter(
+      (set) => set.exercise === exerciseName,
+    );
     const targetSets = workoutExercise.sets || 1;
-    
-    return Math.min(100, Math.round((completedExerciseSets.length / targetSets) * 100));
+
+    return Math.min(
+      100,
+      Math.round((completedExerciseSets.length / targetSets) * 100),
+    );
   };
-  
+
   // Calculate overall workout progress
   const calculateWorkoutProgress = () => {
-    if (!workout || !workout.exercises || workout.exercises.length === 0) return 0;
-    
-    const totalSets = workout.exercises.reduce((total, ex) => total + (ex.sets || 1), 0);
+    if (!workout || !workout.exercises || workout.exercises.length === 0)
+      return 0;
+
+    const totalSets = workout.exercises.reduce(
+      (total, ex) => total + (ex.sets || 1),
+      0,
+    );
     const completedSetsCount = completedSets.length;
-    
+
     return Math.min(100, Math.round((completedSetsCount / totalSets) * 100));
   };
 
@@ -301,7 +316,7 @@ const WorkoutRecordDetail = () => {
           <span className="font-medium">{formatElapsedTime(elapsedTime)}</span>
         </div>
       </div>
-      
+
       <Card>
         <CardHeader className="pb-3">
           <CardTitle className="flex items-center justify-between">
@@ -376,7 +391,9 @@ const WorkoutRecordDetail = () => {
                 const exerciseSets = getCompletedSetsForExercise(
                   exercise.exercise,
                 );
-                const exerciseProgress = calculateExerciseProgress(exercise.exercise);
+                const exerciseProgress = calculateExerciseProgress(
+                  exercise.exercise,
+                );
 
                 return (
                   <TableRow
@@ -409,7 +426,9 @@ const WorkoutRecordDetail = () => {
                                 <span>Set {idx + 1}:</span>
                                 {set.reps && <span>{set.reps} reps</span>}
                                 {set.weight && <span>{set.weight} kg</span>}
-                                {set.duration && <span>{set.duration} sec</span>}
+                                {set.duration && (
+                                  <span>{set.duration} sec</span>
+                                )}
                               </div>
                             ))}
                           </div>

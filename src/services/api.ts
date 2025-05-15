@@ -191,8 +191,11 @@ class ApiService {
     });
   }
 
-  async createExerciseRecord(data: any) {
-    return this.request<ExerciseRecord>("/user/exercises/", {
+  async createExerciseRecord(data: any, workoutUuid?: string) {
+    const endpoint = workoutUuid
+      ? `/user/workouts/${workoutUuid}/exercises`
+      : "/user/exercises/";
+    return this.request<ExerciseRecord>(endpoint, {
       method: "POST",
       body: JSON.stringify(data),
     });
