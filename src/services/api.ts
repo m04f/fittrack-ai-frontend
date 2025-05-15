@@ -1,3 +1,4 @@
+
 import { toast } from "sonner";
 import {
   AuthResponse,
@@ -8,6 +9,7 @@ import {
   Workout,
   WorkoutRecord,
   Plan,
+  ExerciseRecord,
 } from "@/types/api";
 
 // API Configuration
@@ -178,8 +180,19 @@ class ApiService {
     }>("/user/workouts/");
   }
 
+  async getUserWorkoutRecord(uuid: string) {
+    return this.request<WorkoutRecord>(`/user/workouts/${uuid}/`);
+  }
+
   async createWorkoutRecord(data: any) {
     return this.request<WorkoutRecord>("/user/workouts/", {
+      method: "POST",
+      body: JSON.stringify(data),
+    });
+  }
+
+  async createExerciseRecord(data: any) {
+    return this.request<ExerciseRecord>("/user/exercises/", {
       method: "POST",
       body: JSON.stringify(data),
     });

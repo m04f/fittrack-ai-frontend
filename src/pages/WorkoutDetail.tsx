@@ -60,11 +60,9 @@ const WorkoutDetail = () => {
       });
       
       toast.success("Workout started successfully!");
-      // In a real app, you would navigate to a workout tracking page
-      console.log("Created workout record:", workoutRecord);
       
-      // For now, we'll just show a success message
-      // In the future, you would navigate to a page where the user can track their exercises
+      // Redirect to the workout record detail page
+      navigate(`/workout-record/${workoutRecord.uuid}`);
     } catch (error) {
       console.error("Error starting workout:", error);
       toast.error("Failed to start workout");
