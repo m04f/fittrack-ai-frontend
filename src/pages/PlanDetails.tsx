@@ -3,14 +3,22 @@ import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Calendar as CalendarIcon, CalendarCheck, CalendarPlus } from "lucide-react";
+import { 
+  CalendarIcon, 
+  CheckCircle2, 
+  Clock, 
+  ArrowRight, 
+  CalendarDaysIcon,
+  ChevronRight
+} from "lucide-react";
 import api from "@/services/api";
 import { UserPlan, Plan } from "@/types/api";
 import { Skeleton } from "@/components/ui/skeleton";
-import { Calendar } from "@/components/ui/calendar";
-import { format, parseISO, isSameDay } from "date-fns";
+import { format, parseISO, isToday, isBefore, isAfter, addDays } from "date-fns";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { Progress } from "@/components/ui/progress";
+import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 
 const PlanDetails = () => {
@@ -51,58 +59,115 @@ const PlanDetails = () => {
     }
   }, [planId]);
 
-  // Process workout dates for calendar
-  const workoutDates = userPlan?.workouts?.map(w => ({
-    date: parseISO(w.date),
-    uuid: w.uuid,
-    workoutId: w.workout,
-    completed: w.record !== null,
-  })) || [];
-
   // Count completed workouts for progress
   const completedCount = userPlan?.workouts?.filter(w => w.record !== null).length || 0;
   const totalWorkouts = userPlan?.workouts?.length || 0;
   const progressPercentage = totalWorkouts > 0 ? (completedCount / totalWorkouts) * 100 : 0;
 
-  const handleDateClick = (date: Date) => {
-    const selectedWorkout = workoutDates.find(w => isSameDay(w.date, date));
+  // Group workouts by week
+  const groupWorkoutsByWeek = () => {
+    if (!userPlan?.workouts) return [];
     
-    if (selectedWorkout) {
-      // Navigate to the workout details with the planday parameter
-      navigate(`/workouts/${selectedWorkout.workoutId}?planday=${selectedWorkout.uuid}`);
+    const sortedWorkouts = [...userPlan.workouts].sort((a, b) => 
+      new Date(a.date).getTime() - new Date(b.date).getTime()
+    );
+    
+    const weeks: Array<{
+      weekStart: Date;
+      workouts: typeof sortedWorkouts;
+      isCurrentWeek: boolean;
+    }> = [];
+    
+    let currentWeekStart: Date | null = null;
+    let currentWeekWorkouts: typeof sortedWorkouts = [];
+    
+    sortedWorkouts.forEach(workout => {
+      const workoutDate = parseISO(workout.date);
+      
+      if (!currentWeekStart) {
+        // First workout defines the first week
+        currentWeekStart = new Date(workoutDate);
+        currentWeekStart.setDate(currentWeekStart.getDate() - currentWeekStart.getDay());
+        currentWeekWorkouts.push(workout);
+      } else {
+        // Check if this workout is in the same week
+        const nextWeekStart = new Date(currentWeekStart);
+        nextWeekStart.setDate(nextWeekStart.getDate() + 7);
+        
+        if (workoutDate < nextWeekStart) {
+          // Same week
+          currentWeekWorkouts.push(workout);
+        } else {
+          // New week
+          weeks.push({
+            weekStart: new Date(currentWeekStart),
+            workouts: [...currentWeekWorkouts],
+            isCurrentWeek: isCurrentWeek(currentWeekStart)
+          });
+          
+          // Reset for new week
+          currentWeekStart = new Date(workoutDate);
+          currentWeekStart.setDate(currentWeekStart.getDate() - currentWeekStart.getDay());
+          currentWeekWorkouts = [workout];
+        }
+      }
+    });
+    
+    // Add the last week
+    if (currentWeekStart && currentWeekWorkouts.length > 0) {
+      weeks.push({
+        weekStart: new Date(currentWeekStart),
+        workouts: [...currentWeekWorkouts],
+        isCurrentWeek: isCurrentWeek(currentWeekStart)
+      });
+    }
+    
+    return weeks;
+  };
+  
+  const isCurrentWeek = (weekStart: Date) => {
+    const today = new Date();
+    const weekEnd = new Date(weekStart);
+    weekEnd.setDate(weekEnd.getDate() + 6);
+    
+    return today >= weekStart && today <= weekEnd;
+  };
+
+  const handleWorkoutClick = (workoutUuid: string, workoutId: string) => {
+    navigate(`/workouts/${workoutId}?planday=${workoutUuid}`);
+  };
+
+  const getWorkoutStatusClass = (date: string, hasRecord: boolean) => {
+    const workoutDate = parseISO(date);
+    const today = new Date();
+    
+    if (hasRecord) {
+      return "bg-green-50 hover:bg-green-100 border-green-200";
+    } else if (isToday(workoutDate)) {
+      return "bg-blue-50 hover:bg-blue-100 border-blue-200";
+    } else if (isBefore(workoutDate, today)) {
+      return "bg-amber-50 hover:bg-amber-100 border-amber-200";
+    } else {
+      return "bg-gray-50 hover:bg-gray-100 border-gray-200";
     }
   };
 
-  // Customize day rendering in the calendar
-  const renderDay = (date: Date) => {
-    const workout = workoutDates.find(w => isSameDay(w.date, date));
+  const getWorkoutStatusText = (date: string, hasRecord: boolean) => {
+    const workoutDate = parseISO(date);
+    const today = new Date();
     
-    if (!workout) return null;
-    
-    return (
-      <TooltipProvider>
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <div className={`h-full w-full flex items-center justify-center rounded-full ${
-                workout.completed 
-                  ? 'bg-green-100 text-green-700' 
-                  : 'bg-blue-100 text-blue-700'
-              }`}
-            >
-              {date.getDate()}
-              {workout.completed && (
-                <CalendarCheck className="h-3 w-3 ml-0.5 text-green-600" />
-              )}
-            </div>
-          </TooltipTrigger>
-          <TooltipContent>
-            <p>{workout.completed ? "Completed workout" : "Scheduled workout"}</p>
-            <p>Click to view details</p>
-          </TooltipContent>
-        </Tooltip>
-      </TooltipProvider>
-    );
+    if (hasRecord) {
+      return "Completed";
+    } else if (isToday(workoutDate)) {
+      return "Today";
+    } else if (isBefore(workoutDate, today)) {
+      return "Missed";
+    } else {
+      return "Upcoming";
+    }
   };
+
+  const weeks = groupWorkoutsByWeek();
 
   if (loading) {
     return (
@@ -153,44 +218,106 @@ const PlanDetails = () => {
           </div>
           <Progress value={progressPercentage} className="h-2 mb-6" />
 
-          <div className="flex justify-center p-2 bg-card rounded-lg shadow-sm">
-            <Calendar 
-              mode="multiple"
-              selected={workoutDates.map(w => w.date)}
-              onDayClick={handleDateClick}
-              classNames={{
-                day_today: "bg-muted text-foreground", 
-              }}
-              components={{
-                Day: ({ date, ...props }) => {
-                  const content = renderDay(date);
-                  return content ? (
-                    <div {...props} className="h-9 w-9 p-0 cursor-pointer">
-                      {content}
+          {/* Workout Schedule */}
+          <div className="space-y-6">
+            {weeks.map((week, weekIndex) => (
+              <Card key={week.weekStart.toISOString()} className={`overflow-hidden ${week.isCurrentWeek ? 'border-blue-300 shadow-sm' : ''}`}>
+                <CardHeader className="py-2 px-4 bg-muted/40">
+                  <div className="flex justify-between items-center">
+                    <div className="flex items-center">
+                      <CalendarDaysIcon className="h-4 w-4 mr-2 text-muted-foreground" />
+                      <h3 className="text-sm font-medium">
+                        Week {weekIndex + 1}: {format(week.weekStart, "MMM d")} - {format(addDays(week.weekStart, 6), "MMM d")}
+                      </h3>
                     </div>
-                  ) : (
-                    <div {...props}>{date.getDate()}</div>
-                  );
-                },
-              }}
-              className="p-3 pointer-events-auto"
-            />
+                    {week.isCurrentWeek && (
+                      <Badge variant="secondary" className="text-xs">Current Week</Badge>
+                    )}
+                  </div>
+                </CardHeader>
+                <CardContent className="p-0">
+                  <Table>
+                    <TableHeader>
+                      <TableRow>
+                        <TableHead className="w-[100px]">Date</TableHead>
+                        <TableHead>Workout</TableHead>
+                        <TableHead className="w-[100px] text-right">Status</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody>
+                      {week.workouts.map(workout => (
+                        <TableRow 
+                          key={workout.uuid}
+                          className={`cursor-pointer ${getWorkoutStatusClass(workout.date, workout.record !== null)}`}
+                          onClick={() => handleWorkoutClick(workout.uuid, workout.workout)}
+                        >
+                          <TableCell className="font-medium">{format(parseISO(workout.date), "EEE, MMM d")}</TableCell>
+                          <TableCell>Workout Plan</TableCell>
+                          <TableCell className="text-right">
+                            <TooltipProvider>
+                              <Tooltip>
+                                <TooltipTrigger asChild>
+                                  <div className="flex items-center justify-end">
+                                    {workout.record !== null ? (
+                                      <CheckCircle2 className="h-4 w-4 text-green-500 mr-1" />
+                                    ) : isToday(parseISO(workout.date)) ? (
+                                      <Clock className="h-4 w-4 text-blue-500 mr-1" />
+                                    ) : isBefore(parseISO(workout.date), new Date()) ? (
+                                      <Clock className="h-4 w-4 text-amber-500 mr-1" />
+                                    ) : (
+                                      <ArrowRight className="h-4 w-4 text-gray-500 mr-1" />
+                                    )}
+                                    <span className={`text-sm ${workout.record ? 'text-green-700' : ''}`}>
+                                      {getWorkoutStatusText(workout.date, workout.record !== null)}
+                                    </span>
+                                    <ChevronRight className="h-4 w-4 ml-1 text-muted-foreground" />
+                                  </div>
+                                </TooltipTrigger>
+                                <TooltipContent>
+                                  <p>
+                                    {workout.record !== null 
+                                      ? "Workout completed" 
+                                      : "Click to start workout"}
+                                  </p>
+                                </TooltipContent>
+                              </Tooltip>
+                            </TooltipProvider>
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </CardContent>
+              </Card>
+            ))}
           </div>
           
-          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-6">
+          <div className="grid grid-cols-2 gap-2 mt-6">
+            <div className="flex items-center p-2 rounded-md bg-gray-50">
+              <ArrowRight className="h-4 w-4 mr-2 text-gray-600" />
+              <span className="text-sm">Upcoming workout</span>
+            </div>
             <div className="flex items-center p-2 rounded-md bg-blue-50">
-              <CalendarPlus className="h-4 w-4 mr-2 text-blue-600" />
-              <span className="text-sm">Scheduled workout</span>
+              <Clock className="h-4 w-4 mr-2 text-blue-600" />
+              <span className="text-sm">Today's workout</span>
+            </div>
+            <div className="flex items-center p-2 rounded-md bg-amber-50">
+              <Clock className="h-4 w-4 mr-2 text-amber-600" />
+              <span className="text-sm">Missed workout</span>
             </div>
             <div className="flex items-center p-2 rounded-md bg-green-50">
-              <CalendarCheck className="h-4 w-4 mr-2 text-green-600" />
+              <CheckCircle2 className="h-4 w-4 mr-2 text-green-600" />
               <span className="text-sm">Completed workout</span>
             </div>
           </div>
           
-          <p className="text-sm text-muted-foreground mt-6">
-            Click on a workout date in the calendar to view details or start the workout.
-          </p>
+          <Button 
+            variant="outline" 
+            className="w-full mt-6" 
+            onClick={() => navigate('/plans')}
+          >
+            Back to Plans
+          </Button>
         </CardContent>
       </Card>
     </div>
