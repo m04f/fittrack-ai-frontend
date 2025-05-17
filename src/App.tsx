@@ -15,6 +15,7 @@ import Workouts from "./pages/Workouts";
 import WorkoutDetail from "./pages/WorkoutDetail";
 import WorkoutRecordDetail from "./pages/WorkoutRecordDetail";
 import RecordWorkout from "./pages/RecordWorkout";
+import CreateWorkout from "./pages/CreateWorkout"; // Add import for new page
 import Plans from "./pages/Plans";
 import Chat from "./pages/Chat";
 import Profile from "./pages/Profile";
@@ -48,6 +49,7 @@ const App = () => (
                   <Route path="/workouts/:id" element={<WorkoutDetail />} />
                   <Route path="/workout-record/:id" element={<WorkoutRecordDetail />} />
                   <Route path="/record" element={<RecordWorkout />} />
+                  <Route path="/workouts/create" element={<CreateWorkout />} /> {/* Add new route */}
                   <Route path="/plans" element={<Plans />} />
                   <Route path="/plans/:planId" element={<PlanDetails />} />
                   <Route path="/chat" element={<Chat />} />

@@ -182,9 +182,11 @@ const WorkoutsPage = () => {
             <Filter className="mr-2 h-4 w-4" />
             Filter
           </Button>
-          <Button className="bg-fitness-600 hover:bg-fitness-700">
-            <Plus className="mr-2 h-4 w-4" />
-            New Workout
+          <Button className="bg-fitness-600 hover:bg-fitness-700" asChild>
+            <Link to="/workouts/create">
+              <Plus className="mr-2 h-4 w-4" />
+              New Workout
+            </Link>
           </Button>
         </div>
       </div>
@@ -207,9 +209,11 @@ const WorkoutsPage = () => {
                     ? "Try a different search term"
                     : "Create your first workout to get started"}
                 </p>
-                <Button className="mt-4 bg-fitness-600 hover:bg-fitness-700">
-                  <Plus className="mr-2 h-4 w-4" />
-                  Create Workout
+                <Button className="mt-4 bg-fitness-600 hover:bg-fitness-700" asChild>
+                  <Link to="/workouts/create">
+                    <Plus className="mr-2 h-4 w-4" />
+                    Create Workout
+                  </Link>
                 </Button>
               </div>
             )}
