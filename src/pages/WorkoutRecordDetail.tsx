@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useRef } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import {
@@ -30,6 +31,10 @@ import {
   Timer,
   Repeat,
   Activity,
+  Bell,
+  Play,
+  Pause,
+  X,
 } from "lucide-react";
 import api from "@/services/api";
 import {
@@ -41,6 +46,8 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { toast } from "sonner";
 import { Progress } from "@/components/ui/progress";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 
 const WorkoutRecordDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -61,11 +68,33 @@ const WorkoutRecordDetail = () => {
     null,
   );
   const timerInterval = useRef<number | null>(null);
+  
+  // Exercise timer state
+  const [exerciseTimerActive, setExerciseTimerActive] = useState(false);
+  const [exerciseTimeRemaining, setExerciseTimeRemaining] = useState(0);
+  const [activeExerciseTimerIndex, setActiveExerciseTimerIndex] = useState<number | null>(null);
+  const exerciseTimerInterval = useRef<number | null>(null);
+
+  // Sound effect reference
+  const timerAudioRef = useRef<HTMLAudioElement | null>(null);
 
   // Workout progress tracking
   const [workoutStartTime, setWorkoutStartTime] = useState<Date | null>(null);
   const [elapsedTime, setElapsedTime] = useState(0);
   const workoutTimerInterval = useRef<number | null>(null);
+
+  useEffect(() => {
+    // Initialize audio element
+    timerAudioRef.current = new Audio("/timer-bell.mp3");
+    
+    return () => {
+      // Cleanup audio
+      if (timerAudioRef.current) {
+        timerAudioRef.current.pause();
+        timerAudioRef.current = null;
+      }
+    };
+  }, []);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -131,6 +160,7 @@ const WorkoutRecordDetail = () => {
           if (prev <= 1) {
             clearInterval(timerInterval.current as number);
             setRestTimerActive(false);
+            playTimerSound();
             toast.success("Rest time completed!");
             return 0;
           }
@@ -145,6 +175,34 @@ const WorkoutRecordDetail = () => {
       }
     };
   }, [restTimerActive, restTimeRemaining]);
+
+  // Exercise timer effect
+  useEffect(() => {
+    if (exerciseTimerActive && exerciseTimeRemaining > 0 && activeExerciseTimerIndex !== null) {
+      exerciseTimerInterval.current = window.setInterval(() => {
+        setExerciseTimeRemaining((prev) => {
+          if (prev <= 1) {
+            clearInterval(exerciseTimerInterval.current as number);
+            setExerciseTimerActive(false);
+            playTimerSound();
+            
+            // Auto-log the exercise when timer finishes
+            handleAddExercise(activeExerciseTimerIndex);
+            
+            toast.success("Exercise completed!");
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+    }
+
+    return () => {
+      if (exerciseTimerInterval.current) {
+        clearInterval(exerciseTimerInterval.current);
+      }
+    };
+  }, [exerciseTimerActive, exerciseTimeRemaining]);
 
   // Workout timer effect
   useEffect(() => {
@@ -165,6 +223,15 @@ const WorkoutRecordDetail = () => {
     };
   }, [workoutStartTime]);
 
+  const playTimerSound = () => {
+    if (timerAudioRef.current) {
+      timerAudioRef.current.currentTime = 0;
+      timerAudioRef.current.play().catch(error => {
+        console.error("Error playing sound:", error);
+      });
+    }
+  };
+
   const handleExerciseChange = (
     index: number,
     field: keyof ExerciseRecord,
@@ -176,6 +243,25 @@ const WorkoutRecordDetail = () => {
       [field]: value,
     };
     setExerciseRecords(updatedExercises);
+  };
+
+  const startExerciseTimer = (index: number) => {
+    const exercise = exerciseRecords[index];
+    if (!exercise || !exercise.duration) return;
+
+    setExerciseTimeRemaining(exercise.duration);
+    setExerciseTimerActive(true);
+    setActiveExerciseTimerIndex(index);
+    toast.info(`Exercise timer started: ${exercise.duration} seconds`);
+  };
+
+  const cancelExerciseTimer = () => {
+    if (exerciseTimerInterval.current) {
+      clearInterval(exerciseTimerInterval.current);
+      exerciseTimerInterval.current = null;
+    }
+    setExerciseTimerActive(false);
+    setActiveExerciseTimerIndex(null);
   };
 
   const handleAddExercise = async (index: number) => {
@@ -346,41 +432,104 @@ const WorkoutRecordDetail = () => {
         </CardHeader>
       </Card>
 
-      {restTimerActive && (
-        <Card className="border-l-4 border-l-fitness-600">
-          <CardContent className="pt-6">
-            <div className="flex flex-col gap-4">
-              <div className="flex justify-between items-center">
-                <div className="flex items-center gap-2">
-                  <Timer className="h-5 w-5 text-fitness-600" />
-                  <span className="font-medium">
-                    Resting for {formatTime(restTimeRemaining)}
-                  </span>
-                </div>
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => {
-                    clearInterval(timerInterval.current as number);
-                    setRestTimerActive(false);
-                  }}
-                >
-                  Skip
-                </Button>
+      {/* Rest Timer Dialog */}
+      <Dialog open={restTimerActive} onOpenChange={(open) => !open && setRestTimerActive(false)}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex justify-between items-center">
+              <div className="flex items-center">
+                <Timer className="h-5 w-5 text-fitness-600 mr-2" />
+                Rest Timer
               </div>
-              <Progress
-                value={
-                  (restTimeRemaining /
-                    (exerciseRecords[activeExerciseIndex as number]?.rest ||
-                      1)) *
-                  100
-                }
-                className="h-2"
-              />
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="h-8 w-8 p-0" 
+                onClick={() => setRestTimerActive(false)}
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </DialogTitle>
+          </DialogHeader>
+          <div className="flex flex-col items-center py-4 space-y-4">
+            <div className="text-4xl font-bold text-fitness-600">
+              {formatTime(restTimeRemaining)}
             </div>
-          </CardContent>
-        </Card>
-      )}
+            <Progress
+              value={(restTimeRemaining / (exerciseRecords[activeExerciseIndex as number]?.rest || 1)) * 100}
+              className="h-2 w-full"
+            />
+            <p className="text-sm text-muted-foreground">
+              Resting after {exerciseRecords[activeExerciseIndex as number]?.exercise}
+            </p>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => {
+                clearInterval(timerInterval.current as number);
+                setRestTimerActive(false);
+              }}
+            >
+              Skip Rest
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Exercise Timer Dialog */}
+      <Dialog open={exerciseTimerActive} onOpenChange={(open) => !open && cancelExerciseTimer()}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <DialogTitle className="flex justify-between items-center">
+              <div className="flex items-center">
+                <Dumbbell className="h-5 w-5 text-fitness-600 mr-2" />
+                Exercise Timer
+              </div>
+              <Button 
+                variant="ghost" 
+                size="icon" 
+                className="h-8 w-8 p-0" 
+                onClick={cancelExerciseTimer}
+              >
+                <X className="h-4 w-4" />
+              </Button>
+            </DialogTitle>
+          </DialogHeader>
+          <div className="flex flex-col items-center py-4 space-y-4">
+            <div className="text-4xl font-bold text-fitness-600">
+              {formatTime(exerciseTimeRemaining)}
+            </div>
+            <Progress
+              value={(exerciseTimeRemaining / (exerciseRecords[activeExerciseTimerIndex as number]?.duration || 1)) * 100}
+              className="h-2 w-full"
+            />
+            <p className="text-sm text-muted-foreground">
+              {exerciseRecords[activeExerciseTimerIndex as number]?.exercise}
+            </p>
+            <div className="flex space-x-2">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={cancelExerciseTimer}
+              >
+                Cancel
+              </Button>
+              <Button
+                size="sm"
+                className="bg-fitness-600 hover:bg-fitness-700"
+                onClick={() => {
+                  cancelExerciseTimer();
+                  if (activeExerciseTimerIndex !== null) {
+                    handleAddExercise(activeExerciseTimerIndex);
+                  }
+                }}
+              >
+                Complete Now
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
 
       <Card>
         <CardHeader>
@@ -408,12 +557,14 @@ const WorkoutRecordDetail = () => {
                 const exerciseProgress = calculateExerciseProgress(
                   exercise.exercise,
                 );
+                const isTimerActive = activeExerciseTimerIndex === index;
 
                 return (
                   <TableRow
                     key={`${exercise.exercise}-${index}`}
                     className={
-                      activeExerciseIndex === index && restTimerActive
+                      (activeExerciseIndex === index && restTimerActive) ||
+                      (activeExerciseTimerIndex === index && exerciseTimerActive)
                         ? "bg-muted/30"
                         : ""
                     }
@@ -531,18 +682,39 @@ const WorkoutRecordDetail = () => {
                         </span>
                       </div>
                     </TableCell>
-                    <TableCell>
-                      <Button
-                        size="sm"
-                        onClick={() => handleAddExercise(index)}
-                        disabled={
-                          saving ||
-                          (activeExerciseIndex !== null && restTimerActive)
-                        }
-                        className="bg-fitness-600 hover:bg-fitness-700"
-                      >
-                        <Plus className="mr-1 h-4 w-4" /> Add Set
-                      </Button>
+                    <TableCell className="space-y-2">
+                      <div className="flex gap-2">
+                        <Button
+                          size="sm"
+                          onClick={() => handleAddExercise(index)}
+                          disabled={
+                            saving ||
+                            (activeExerciseIndex !== null && restTimerActive) ||
+                            exerciseTimerActive
+                          }
+                          className="bg-fitness-600 hover:bg-fitness-700"
+                        >
+                          <Plus className="mr-1 h-4 w-4" /> Add Set
+                        </Button>
+                        
+                        {exercise.duration && exercise.duration > 0 && (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            onClick={() => startExerciseTimer(index)}
+                            disabled={exerciseTimerActive || restTimerActive}
+                          >
+                            <Timer className="mr-1 h-4 w-4" /> Start
+                          </Button>
+                        )}
+                      </div>
+                      
+                      {isTimerActive && exerciseTimerActive && (
+                        <div className="flex items-center text-xs text-fitness-600">
+                          <Timer className="h-3 w-3 mr-1" />
+                          Timer active: {formatTime(exerciseTimeRemaining)}
+                        </div>
+                      )}
                     </TableCell>
                   </TableRow>
                 );
@@ -562,6 +734,9 @@ const WorkoutRecordDetail = () => {
           </Button>
         </CardFooter>
       </Card>
+      
+      {/* Audio element for timer sound */}
+      <audio src="/timer-bell.mp3" ref={timerAudioRef} />
     </div>
   );
 };
