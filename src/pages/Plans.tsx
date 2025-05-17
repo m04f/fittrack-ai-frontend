@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import {
   Card,
@@ -5,32 +6,59 @@ import {
   CardDescription,
   CardHeader,
   CardTitle,
+  CardFooter,
 } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { Calendar, Plus, Search, FileText, ArrowRight } from "lucide-react";
+import { 
+  Calendar, 
+  Plus, 
+  Search, 
+  FileText, 
+  ArrowRight,
+  CalendarCheck 
+} from "lucide-react";
 import api from "@/services/api";
-import { Plan } from "@/types/api";
+import { Plan, UserPlan } from "@/types/api";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Link } from "react-router-dom";
+import { 
+  Dialog, 
+  DialogContent, 
+  DialogDescription, 
+  DialogFooter, 
+  DialogHeader, 
+  DialogTitle, 
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import { toast } from "sonner";
+import { format } from "date-fns";
 
 const PlansPage = () => {
-  const [plans, setPlans] = useState<Plan[]>([]);
-  const [filteredPlans, setFilteredPlans] = useState<Plan[]>([]);
+  const [userPlans, setUserPlans] = useState<UserPlan[]>([]);
+  const [availablePlans, setAvailablePlans] = useState<Plan[]>([]);
+  const [filteredPlans, setFilteredPlans] = useState<UserPlan[]>([]);
   const [searchTerm, setSearchTerm] = useState("");
   const [loading, setLoading] = useState(true);
+  const [enrollLoading, setEnrollLoading] = useState(false);
+  const [dialogOpen, setDialogOpen] = useState(false);
 
   useEffect(() => {
     const fetchPlans = async () => {
       setLoading(true);
       try {
-        const data = await api.getPlans();
-        const plansList = data || [];
-        setPlans(plansList);
-        setFilteredPlans(plansList);
+        // Fetch user's active plans
+        const userPlansData = await api.getUserPlans();
+        setUserPlans(userPlansData);
+        setFilteredPlans(userPlansData);
+
+        // Also fetch all available plans for enrollment dialog
+        const availablePlansData = await api.getPlans();
+        setAvailablePlans(availablePlansData || []);
       } catch (error) {
         console.error("Error fetching plans:", error);
+        toast.error("Failed to load plans");
       } finally {
         setLoading(false);
       }
@@ -40,28 +68,59 @@ const PlansPage = () => {
   }, []);
 
   useEffect(() => {
-    if (searchTerm) {
-      const filtered = plans.filter(
-        (plan) =>
-          plan.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-          plan.description?.toLowerCase().includes(searchTerm.toLowerCase()),
+    if (searchTerm && userPlans.length > 0) {
+      // Note: This is a simple search that just checks plan IDs
+      // We would need to fetch plan details to search by name
+      const filtered = userPlans.filter(
+        (userPlan) => userPlan.plan.toLowerCase().includes(searchTerm.toLowerCase())
       );
       setFilteredPlans(filtered);
     } else {
-      setFilteredPlans(plans);
+      setFilteredPlans(userPlans);
     }
-  }, [searchTerm, plans]);
+  }, [searchTerm, userPlans]);
 
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchTerm(e.target.value);
   };
 
+  const handleEnrollInPlan = async (planUuid: string) => {
+    setEnrollLoading(true);
+    try {
+      const newUserPlan = await api.enrollInPlan(planUuid);
+      setUserPlans([...userPlans, newUserPlan]);
+      setFilteredPlans([...userPlans, newUserPlan]);
+      toast.success("Successfully enrolled in plan");
+      setDialogOpen(false);
+    } catch (error) {
+      console.error("Error enrolling in plan:", error);
+      toast.error("Failed to enroll in plan");
+    } finally {
+      setEnrollLoading(false);
+    }
+  };
+
+  // Helper function to find next upcoming workout
+  const getNextWorkout = (plan: UserPlan) => {
+    const today = new Date().toISOString().split('T')[0];
+    const upcomingWorkouts = plan.workouts
+      .filter(w => w.date >= today && w.record === null)
+      .sort((a, b) => a.date.localeCompare(b.date));
+    
+    return upcomingWorkouts.length > 0 ? upcomingWorkouts[0] : null;
+  };
+
+  // Helper function to count completed workouts
+  const getCompletedWorkoutsCount = (plan: UserPlan) => {
+    return plan.workouts.filter(w => w.record !== null).length;
+  };
+
   return (
     <div className="animate-enter space-y-6">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Training Plans</h1>
+        <h1 className="text-3xl font-bold tracking-tight">My Active Plans</h1>
         <p className="text-muted-foreground">
-          Browse and follow structured workout plans
+          Track your ongoing training plans and progress
         </p>
       </div>
 
@@ -75,15 +134,66 @@ const PlansPage = () => {
             onChange={handleSearch}
           />
         </div>
-        <Button className="bg-fitness-600 hover:bg-fitness-700">
-          <Plus className="mr-2 h-4 w-4" />
-          Create Plan
-        </Button>
+        <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+          <DialogTrigger asChild>
+            <Button className="bg-fitness-600 hover:bg-fitness-700">
+              <Plus className="mr-2 h-4 w-4" />
+              Enroll in Plan
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="sm:max-w-[500px] max-h-[80vh] overflow-y-auto">
+            <DialogHeader>
+              <DialogTitle>Enroll in a Training Plan</DialogTitle>
+              <DialogDescription>
+                Select a plan to add to your active plans
+              </DialogDescription>
+            </DialogHeader>
+            <div className="grid gap-4 py-4">
+              {availablePlans.length > 0 ? (
+                availablePlans.map((plan) => (
+                  <Card key={plan.uuid} className="overflow-hidden">
+                    <CardHeader className="pb-2">
+                      <div className="flex justify-between items-start">
+                        <CardTitle className="text-lg">{plan.name}</CardTitle>
+                        <Badge
+                          variant={plan.public ? "default" : "outline"}
+                          className={plan.public ? "bg-fitness-500" : ""}
+                        >
+                          {plan.public ? "Public" : "Private"}
+                        </Badge>
+                      </div>
+                      <CardDescription className="line-clamp-1">
+                        {plan.description || "No description available"}
+                      </CardDescription>
+                    </CardHeader>
+                    <CardFooter className="pt-2 flex justify-between">
+                      <span className="text-xs text-muted-foreground">
+                        {plan.workouts.length} workouts
+                      </span>
+                      <Button 
+                        onClick={() => handleEnrollInPlan(plan.uuid)}
+                        disabled={enrollLoading}
+                        size="sm"
+                      >
+                        Enroll
+                      </Button>
+                    </CardFooter>
+                  </Card>
+                ))
+              ) : (
+                <div className="text-center py-4">No available plans to enroll in</div>
+              )}
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setDialogOpen(false)}>Cancel</Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
 
       {loading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {[...Array(6)].map((_, i) => (
+          {[...Array(3)].map((_, i) => (
             <Card key={i}>
               <CardHeader>
                 <div className="flex justify-between">
@@ -113,82 +223,127 @@ const PlansPage = () => {
         <>
           {filteredPlans.length > 0 ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              {filteredPlans.map((plan) => (
-                <Card key={plan.uuid} className="flex flex-col h-full">
-                  <CardHeader>
-                    <div className="flex justify-between items-start">
-                      <CardTitle className="text-xl">{plan.name}</CardTitle>
-                      <Badge
-                        variant={plan.public ? "default" : "outline"}
-                        className={plan.public ? "bg-fitness-500" : ""}
-                      >
-                        {plan.public ? "Public" : "Private"}
-                      </Badge>
-                    </div>
-                    <CardDescription className="line-clamp-2">
-                      {plan.description || "No description available"}
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent className="flex-1 flex flex-col">
-                    <div className="mb-4">
-                      <div className="flex items-center mb-2">
-                        <Calendar className="h-4 w-4 mr-2 text-muted-foreground" />
-                        <span className="text-sm font-medium">
-                          {plan.workouts.length} workouts •{" "}
-                          {plan.workouts.length} days
-                        </span>
-                      </div>
+              {filteredPlans.map((userPlan) => {
+                const nextWorkout = getNextWorkout(userPlan);
+                const completedWorkouts = getCompletedWorkoutsCount(userPlan);
+                const totalWorkouts = userPlan.workouts.length;
+                
+                return (
+                  <Card key={userPlan.uuid} className="flex flex-col h-full">
+                    <CardHeader>
+                      <CardTitle className="text-xl">
+                        Training Plan (Started {format(new Date(userPlan.start_date), 'PP')})
+                      </CardTitle>
+                    </CardHeader>
+                    <CardContent className="flex-1 flex flex-col">
+                      <div className="mb-4">
+                        <div className="flex items-center mb-2">
+                          <Calendar className="h-4 w-4 mr-2 text-muted-foreground" />
+                          <span className="text-sm font-medium">
+                            {totalWorkouts} workouts • {completedWorkouts} completed
+                          </span>
+                        </div>
+                        
+                        <div className="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700 mb-3">
+                          <div 
+                            className="bg-fitness-500 h-2.5 rounded-full" 
+                            style={{ width: `${(completedWorkouts / totalWorkouts) * 100}%` }}
+                          ></div>
+                        </div>
 
-                      <div className="space-y-1">
-                        <h4 className="font-medium mb-1 text-sm">Schedule:</h4>
-                        <ul className="text-sm text-muted-foreground">
-                          {plan.workouts.slice(0, 3).map((planWorkout) => (
-                            <li
-                              key={planWorkout.uuid}
-                              className="flex justify-between"
-                            >
-                              <span>Day {planWorkout.day}</span>
-                              <span className="truncate max-w-[70%] text-right">
-                                {planWorkout.name}
-                              </span>
-                            </li>
-                          ))}
-                          {plan.workouts.length > 3 && (
-                            <li className="text-xs italic">
-                              +{plan.workouts.length - 3} more days
-                            </li>
+                        <div className="space-y-2 mt-4">
+                          <h4 className="font-medium mb-1 text-sm">Next workout:</h4>
+                          {nextWorkout ? (
+                            <div className="flex justify-between text-sm p-2 bg-muted rounded-md">
+                              <span>{format(new Date(nextWorkout.date), 'PP')}</span>
+                              <span>Workout ID: {nextWorkout.workout.substring(0, 6)}...</span>
+                            </div>
+                          ) : (
+                            <p className="text-sm text-muted-foreground">No upcoming workouts</p>
                           )}
-                        </ul>
+                        </div>
                       </div>
-                    </div>
 
-                    <div className="flex justify-between mt-auto items-center">
-                      <span className="text-xs text-muted-foreground">
-                        Creator: {plan.creator}
-                      </span>
-                      <Button asChild size="sm" variant="outline">
-                        <Link to={`/plans/${plan.uuid}`}>
-                          View <ArrowRight className="ml-1 h-4 w-4" />
-                        </Link>
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
+                      <div className="flex justify-between mt-auto items-center">
+                        <div className="flex items-center">
+                          <CalendarCheck className="h-4 w-4 mr-2 text-fitness-500" />
+                          <span className="text-sm">{completedWorkouts}/{totalWorkouts}</span>
+                        </div>
+                        <Button asChild size="sm" variant="outline">
+                          <Link to={`/plans/${userPlan.uuid}`}>
+                            View Calendar <ArrowRight className="ml-1 h-4 w-4" />
+                          </Link>
+                        </Button>
+                      </div>
+                    </CardContent>
+                  </Card>
+                );
+              })}
             </div>
           ) : (
             <div className="col-span-full flex flex-col items-center justify-center py-12">
               <FileText className="h-12 w-12 text-muted-foreground mb-4" />
-              <h3 className="text-lg font-medium">No plans found</h3>
+              <h3 className="text-lg font-medium">No active plans</h3>
               <p className="text-sm text-muted-foreground mt-1">
                 {searchTerm
                   ? "Try a different search term"
-                  : "Create your first training plan to get started"}
+                  : "Enroll in a training plan to get started"}
               </p>
-              <Button className="mt-4 bg-fitness-600 hover:bg-fitness-700">
-                <Plus className="mr-2 h-4 w-4" />
-                Create Training Plan
-              </Button>
+              <Dialog>
+                <DialogTrigger asChild>
+                  <Button className="mt-4 bg-fitness-600 hover:bg-fitness-700">
+                    <Plus className="mr-2 h-4 w-4" />
+                    Enroll in Training Plan
+                  </Button>
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-[500px] max-h-[80vh] overflow-y-auto">
+                  <DialogHeader>
+                    <DialogTitle>Enroll in a Training Plan</DialogTitle>
+                    <DialogDescription>
+                      Select a plan to add to your active plans
+                    </DialogDescription>
+                  </DialogHeader>
+                  <div className="grid gap-4 py-4">
+                    {availablePlans.length > 0 ? (
+                      availablePlans.map((plan) => (
+                        <Card key={plan.uuid} className="overflow-hidden">
+                          <CardHeader className="pb-2">
+                            <div className="flex justify-between items-start">
+                              <CardTitle className="text-lg">{plan.name}</CardTitle>
+                              <Badge
+                                variant={plan.public ? "default" : "outline"}
+                                className={plan.public ? "bg-fitness-500" : ""}
+                              >
+                                {plan.public ? "Public" : "Private"}
+                              </Badge>
+                            </div>
+                            <CardDescription className="line-clamp-1">
+                              {plan.description || "No description available"}
+                            </CardDescription>
+                          </CardHeader>
+                          <CardFooter className="pt-2 flex justify-between">
+                            <span className="text-xs text-muted-foreground">
+                              {plan.workouts.length} workouts
+                            </span>
+                            <Button 
+                              onClick={() => handleEnrollInPlan(plan.uuid)}
+                              disabled={enrollLoading}
+                              size="sm"
+                            >
+                              Enroll
+                            </Button>
+                          </CardFooter>
+                        </Card>
+                      ))
+                    ) : (
+                      <div className="text-center py-4">No available plans to enroll in</div>
+                    )}
+                  </div>
+                  <DialogFooter>
+                    <Button variant="outline" onClick={() => setDialogOpen(false)}>Cancel</Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
             </div>
           )}
         </>

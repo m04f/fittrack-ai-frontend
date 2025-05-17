@@ -126,6 +126,21 @@ export interface Plan {
   public: boolean;
 }
 
+// User Plan Types
+export interface UserPlanWorkout {
+  uuid: string;
+  workout: string;
+  record: string | null;
+  date: string;
+}
+
+export interface UserPlan {
+  uuid: string;
+  plan: string;
+  start_date: string;
+  workouts: UserPlanWorkout[];
+}
+
 export interface PlanUser {
   uuid: string;
   plan: string;
