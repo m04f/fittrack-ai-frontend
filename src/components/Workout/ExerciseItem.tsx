@@ -1,4 +1,3 @@
-
 import React from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
@@ -14,98 +13,112 @@ interface ExerciseItemProps {
   dragHandleProps?: any;
 }
 
-const ExerciseItem = ({ 
-  exercise, 
-  onUpdate, 
-  onRemove, 
-  dragHandleProps 
+const ExerciseItem = ({
+  exercise,
+  onUpdate,
+  onRemove,
+  dragHandleProps,
 }: ExerciseItemProps) => {
   const handleChange = (field: keyof WorkoutExercise, value: any) => {
     onUpdate(exercise.uuid, { [field]: value });
   };
 
-  return (
-    <Card className="mb-4">
-      <CardContent className="pt-6">
-        <div className="flex items-center justify-between mb-4">
-          <div className="flex items-center">
-            <div 
-              {...dragHandleProps} 
-              className="cursor-grab mr-3 p-1 rounded hover:bg-muted"
-            >
-              <Grip className="h-5 w-5 text-muted-foreground" />
-            </div>
-            <h3 className="font-medium">{exercise.exercise}</h3>
-          </div>
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            onClick={() => onRemove(exercise.uuid)}
-          >
-            <X className="h-4 w-4" />
-          </Button>
+  const compactView = (
+    <div className="flex items-center justify-between p-2 border rounded mb-2">
+      <div className="flex items-center">
+        <div
+          {...dragHandleProps}
+          className="cursor-grab mr-3 p-1 rounded hover:bg-muted"
+        >
+          <Grip className="h-5 w-5 text-muted-foreground" />
         </div>
-
-        <div className="grid grid-cols-2 gap-4 mb-2">
-          <div>
-            <Label htmlFor={`sets-${exercise.uuid}`}>Sets</Label>
-            <Input
+        <span className="font-medium">{exercise.exercise}</span>
+        <div className="ml-auto grid grid-cols-4 gap-4 text-sm text-muted-foreground items-center">
+          <div className="flex flex-col items-center">
+            <label
+              htmlFor={`sets-${exercise.uuid}`}
+              className="text-xs font-medium"
+            >
+              Sets
+            </label>
+            <input
               id={`sets-${exercise.uuid}`}
               type="number"
               min="1"
               value={exercise.sets}
-              onChange={(e) => handleChange("sets", parseInt(e.target.value, 10) || 1)}
+              onChange={(e) =>
+                handleChange("sets", parseInt(e.target.value, 10) || 1)
+              }
+              className="w-16 border rounded px-1 text-center"
             />
           </div>
-          <div>
-            <Label htmlFor={`rest-${exercise.uuid}`}>Rest (seconds)</Label>
-            <Input
+          <div className="flex flex-col items-center">
+            <label
+              htmlFor={`reps-${exercise.uuid}`}
+              className="text-xs font-medium"
+            >
+              Reps
+            </label>
+            <input
+              id={`reps-${exercise.uuid}`}
+              type="number"
+              min="0"
+              value={exercise.reps || 0}
+              onChange={(e) =>
+                handleChange("reps", parseInt(e.target.value, 10) || 0)
+              }
+              className="w-16 border rounded px-1 text-center"
+            />
+          </div>
+          <div className="flex flex-col items-center">
+            <label
+              htmlFor={`rest-${exercise.uuid}`}
+              className="text-xs font-medium"
+            >
+              Rest
+            </label>
+            <input
               id={`rest-${exercise.uuid}`}
               type="number"
               min="0"
-              value={exercise.rest}
-              onChange={(e) => handleChange("rest", parseInt(e.target.value, 10) || 0)}
+              value={exercise.rest || 0}
+              onChange={(e) =>
+                handleChange("rest", parseInt(e.target.value, 10) || 0)
+              }
+              className="w-16 border rounded px-1 text-center"
+            />
+          </div>
+          <div className="flex flex-col items-center">
+            <label
+              htmlFor={`duration-${exercise.uuid}`}
+              className="text-xs font-medium"
+            >
+              Duration (s)
+            </label>
+            <input
+              id={`duration-${exercise.uuid}`}
+              type="number"
+              min="0"
+              value={exercise.duration || 0}
+              onChange={(e) =>
+                handleChange("duration", parseInt(e.target.value, 10) || 0)
+              }
+              className="w-16 border rounded px-1 text-center"
             />
           </div>
         </div>
-
-        <div className="grid grid-cols-2 gap-4">
-          {exercise.reps !== null && (
-            <div>
-              <Label htmlFor={`reps-${exercise.uuid}`}>Reps</Label>
-              <Input
-                id={`reps-${exercise.uuid}`}
-                type="number"
-                min="0"
-                value={exercise.reps || 0}
-                onChange={(e) => handleChange("reps", parseInt(e.target.value, 10) || 0)}
-              />
-            </div>
-          )}
-          {exercise.duration !== null && (
-            <div>
-              <Label htmlFor={`duration-${exercise.uuid}`}>Duration (seconds)</Label>
-              <Input
-                id={`duration-${exercise.uuid}`}
-                type="number"
-                min="0"
-                value={exercise.duration || 0}
-                onChange={(e) => handleChange("duration", parseInt(e.target.value, 10) || 0)}
-              />
-            </div>
-          )}
-          <div className="col-span-2">
-            <Label htmlFor={`notes-${exercise.uuid}`}>Notes (optional)</Label>
-            <Input
-              id={`notes-${exercise.uuid}`}
-              value={exercise.notes || ""}
-              onChange={(e) => handleChange("notes", e.target.value)}
-            />
-          </div>
-        </div>
-      </CardContent>
-    </Card>
+      </div>
+      <Button
+        variant="ghost"
+        size="icon"
+        onClick={() => onRemove(exercise.uuid)}
+      >
+        <X className="h-4 w-4" />
+      </Button>
+    </div>
   );
+
+  return compactView;
 };
 
 export default ExerciseItem;
