@@ -1,4 +1,3 @@
-
 // API Types for the fitness app
 
 // Auth Types
@@ -96,7 +95,7 @@ export interface ExerciseRecord {
   datetime: string;
   rest?: number | null;
   duration?: number | null;
-  saved?: boolean;  // Added for UI tracking of saved sets
+  saved?: boolean; // Added for UI tracking of saved sets
 }
 
 export interface WorkoutRecord {
@@ -130,6 +129,7 @@ export interface Plan {
 export interface UserPlanWorkout {
   uuid: string;
   workout: string;
+  name: string;
   record: string | null;
   date: string;
 }

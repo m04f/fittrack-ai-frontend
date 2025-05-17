@@ -1,13 +1,34 @@
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useParams, Link, useNavigate } from "react-router-dom";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Separator } from "@/components/ui/separator";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { ArrowLeft, Clock, Dumbbell, Play, Edit, Share, Weight } from "lucide-react";
+import {
+  ArrowLeft,
+  Clock,
+  Dumbbell,
+  Play,
+  Edit,
+  Share,
+  Weight,
+} from "lucide-react";
 import api from "@/services/api";
 import { Workout, WorkoutExercise, WorkoutRecord } from "@/types/api";
 import { Skeleton } from "@/components/ui/skeleton";
@@ -17,7 +38,8 @@ const WorkoutDetail = () => {
   const { id } = useParams<{ id: string }>();
   const [workout, setWorkout] = useState<Workout | null>(null);
   const [searchParams] = useSearchParams();
-  const planday = searchParams.get("planday");
+  const planworkout = searchParams.get("planworkout");
+  const plan = searchParams.get("plan");
   const [loading, setLoading] = useState(true);
   const [startingWorkout, setStartingWorkout] = useState(false);
   const navigate = useNavigate();
@@ -25,7 +47,7 @@ const WorkoutDetail = () => {
   useEffect(() => {
     const fetchWorkout = async () => {
       if (!id) return;
-      
+
       setLoading(true);
       try {
         const data = await api.getWorkout(id);
@@ -44,26 +66,30 @@ const WorkoutDetail = () => {
   const formatTime = (seconds: number) => {
     const minutes = Math.floor(seconds / 60);
     const remainingSeconds = seconds % 60;
-    
+
     if (minutes === 0) {
       return `${seconds} sec`;
     }
-    
-    return `${minutes} min${remainingSeconds > 0 ? ` ${remainingSeconds} sec` : ''}`;
+
+    return `${minutes} min${remainingSeconds > 0 ? ` ${remainingSeconds} sec` : ""}`;
   };
 
   const handleStartWorkout = async () => {
     if (!workout) return;
-    
+
     setStartingWorkout(true);
     try {
       const workoutRecord = await api.createWorkoutRecord({
         workout: workout.uuid,
-        planday: planday || null
       });
-      
+      await api.setPlanWorkoutRecord({
+        record: workoutRecord.uuid,
+        plan: plan,
+        workout: planworkout,
+      });
+
       toast.success("Workout started successfully!");
-      
+
       // Redirect to the workout record detail page
       navigate(`/workout-record/${workoutRecord.uuid}`);
     } catch (error) {
@@ -84,11 +110,13 @@ const WorkoutDetail = () => {
             <ArrowLeft className="h-4 w-4" />
           </Link>
         </Button>
-        <h1 className="text-3xl font-bold tracking-tight">{loading ? <Skeleton className="h-9 w-40" /> : workout?.name}</h1>
+        <h1 className="text-3xl font-bold tracking-tight">
+          {loading ? <Skeleton className="h-9 w-40" /> : workout?.name}
+        </h1>
         {loading ? (
           <Skeleton className="h-6 w-20 ml-auto" />
         ) : (
-          <Badge 
+          <Badge
             variant={workout?.public ? "default" : "outline"}
             className={`${workout?.public ? "bg-fitness-500" : ""} ml-auto`}
           >
@@ -101,46 +129,54 @@ const WorkoutDetail = () => {
         <div className="space-y-4">
           <Skeleton className="h-6 w-full" />
           <Skeleton className="h-6 w-2/3" />
-          
+
           <div className="flex gap-4 my-6">
             <Skeleton className="h-16 w-32" />
             <Skeleton className="h-16 w-32" />
           </div>
-          
+
           <Skeleton className="h-[400px] w-full" />
         </div>
       ) : (
         <>
           <div>
-            <p className="text-muted-foreground">{workout?.description || "No description provided"}</p>
+            <p className="text-muted-foreground">
+              {workout?.description || "No description provided"}
+            </p>
             <div className="flex flex-wrap gap-6 mt-4">
               <div className="flex items-center">
                 <Clock className="h-5 w-5 mr-2 text-fitness-600" />
                 <span>
-                  <span className="font-medium">{formatTime(totalDuration)}</span>{" "}
+                  <span className="font-medium">
+                    {formatTime(totalDuration)}
+                  </span>{" "}
                   <span className="text-muted-foreground">total time</span>
                 </span>
               </div>
               <div className="flex items-center">
                 <Dumbbell className="h-5 w-5 mr-2 text-fitness-600" />
                 <span>
-                  <span className="font-medium">{workout?.exercises.length}</span>{" "}
+                  <span className="font-medium">
+                    {workout?.exercises.length}
+                  </span>{" "}
                   <span className="text-muted-foreground">exercises</span>
                 </span>
               </div>
               <div className="flex items-center">
-                <span className="text-sm text-muted-foreground">Created by: {workout?.creator}</span>
+                <span className="text-sm text-muted-foreground">
+                  Created by: {workout?.creator}
+                </span>
               </div>
             </div>
           </div>
 
           <div className="flex flex-wrap gap-2">
-            <Button 
+            <Button
               className="bg-fitness-600 hover:bg-fitness-700"
               onClick={handleStartWorkout}
               disabled={startingWorkout}
             >
-              <Play className="mr-2 h-4 w-4" /> 
+              <Play className="mr-2 h-4 w-4" />
               {startingWorkout ? "Starting..." : "Start Workout"}
             </Button>
             <Button variant="outline">
@@ -181,17 +217,19 @@ const WorkoutDetail = () => {
                       {workout?.exercises?.map((exercise, index) => (
                         <TableRow key={exercise.uuid}>
                           <TableCell>{index + 1}</TableCell>
-                          <TableCell className="font-medium">{exercise.exercise}</TableCell>
+                          <TableCell className="font-medium">
+                            {exercise.exercise}
+                          </TableCell>
                           <TableCell>{exercise.sets}x</TableCell>
                           <TableCell>
-                            {exercise.reps 
-                              ? `${exercise.reps} reps` 
-                              : exercise.duration 
-                                ? `${exercise.duration} sec` 
-                                : '—'}
+                            {exercise.reps
+                              ? `${exercise.reps} reps`
+                              : exercise.duration
+                                ? `${exercise.duration} sec`
+                                : "—"}
                           </TableCell>
                           <TableCell>
-                            {exercise.weight ? `${exercise.weight} kg` : '—'}
+                            {exercise.weight ? `${exercise.weight} kg` : "—"}
                           </TableCell>
                           <TableCell>{exercise.rest} sec</TableCell>
                         </TableRow>

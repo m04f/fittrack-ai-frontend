@@ -1,4 +1,3 @@
-
 import { toast } from "sonner";
 import {
   AuthResponse,
@@ -13,6 +12,7 @@ import {
   UpdateWorkoutRecordPayload,
   UserPlan,
   UserPlanWorkout,
+  PlanWorkout,
 } from "@/types/api";
 
 // API Configuration
@@ -180,7 +180,7 @@ class ApiService {
       body: JSON.stringify(data),
     });
   }
-  
+
   async getWorkoutRecords() {
     return this.request<{
       results: WorkoutRecord[];
@@ -211,6 +211,23 @@ class ApiService {
     });
   }
 
+  async setPlanWorkoutRecord(data: {
+    record: string;
+    plan: string;
+    workout: string;
+  }) {
+    return this.request<UserPlanWorkout>(
+      `/user/plans/${data.plan}/workouts/${data.workout}`,
+      {
+        method: "PATCH",
+        body: JSON.stringify({
+          uuid: data.workout,
+          record: data.record,
+        }),
+      },
+    );
+  }
+
   // Plan endpoints
   async getPlans() {
     return this.request<Plan[]>("/plans/");
@@ -232,11 +249,18 @@ class ApiService {
     });
   }
 
-  async updateUserPlanWorkout(planUuid: string, workoutUuid: string, data: { record: string }) {
-    return this.request<UserPlanWorkout>(`/user/plans/${planUuid}/workouts/${workoutUuid}`, {
-      method: "PATCH",
-      body: JSON.stringify(data),
-    });
+  async updateUserPlanWorkout(
+    planUuid: string,
+    workoutUuid: string,
+    data: { record: string },
+  ) {
+    return this.request<UserPlanWorkout>(
+      `/user/plans/${planUuid}/workouts/${workoutUuid}`,
+      {
+        method: "PATCH",
+        body: JSON.stringify(data),
+      },
+    );
   }
 
   // Chat endpoints

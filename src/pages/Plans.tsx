@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import {
   Card,
@@ -11,25 +10,25 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
-import { 
-  Calendar, 
-  Plus, 
-  Search, 
-  FileText, 
+import {
+  Calendar,
+  Plus,
+  Search,
+  FileText,
   ArrowRight,
-  CalendarCheck 
+  CalendarCheck,
 } from "lucide-react";
 import api from "@/services/api";
 import { Plan, UserPlan } from "@/types/api";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Link } from "react-router-dom";
-import { 
-  Dialog, 
-  DialogContent, 
-  DialogDescription, 
-  DialogFooter, 
-  DialogHeader, 
-  DialogTitle, 
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
 import { toast } from "sonner";
@@ -71,8 +70,8 @@ const PlansPage = () => {
     if (searchTerm && userPlans.length > 0) {
       // Note: This is a simple search that just checks plan IDs
       // We would need to fetch plan details to search by name
-      const filtered = userPlans.filter(
-        (userPlan) => userPlan.plan.toLowerCase().includes(searchTerm.toLowerCase())
+      const filtered = userPlans.filter((userPlan) =>
+        userPlan.plan.toLowerCase().includes(searchTerm.toLowerCase()),
       );
       setFilteredPlans(filtered);
     } else {
@@ -102,17 +101,17 @@ const PlansPage = () => {
 
   // Helper function to find next upcoming workout
   const getNextWorkout = (plan: UserPlan) => {
-    const today = new Date().toISOString().split('T')[0];
+    const today = new Date().toISOString().split("T")[0];
     const upcomingWorkouts = plan.workouts
-      .filter(w => w.date >= today && w.record === null)
+      .filter((w) => w.date >= today && w.record === null)
       .sort((a, b) => a.date.localeCompare(b.date));
-    
+
     return upcomingWorkouts.length > 0 ? upcomingWorkouts[0] : null;
   };
 
   // Helper function to count completed workouts
   const getCompletedWorkoutsCount = (plan: UserPlan) => {
-    return plan.workouts.filter(w => w.record !== null).length;
+    return plan.workouts.filter((w) => w.record !== null).length;
   };
 
   return (
@@ -170,7 +169,7 @@ const PlansPage = () => {
                       <span className="text-xs text-muted-foreground">
                         {plan.workouts.length} workouts
                       </span>
-                      <Button 
+                      <Button
                         onClick={() => handleEnrollInPlan(plan.uuid)}
                         disabled={enrollLoading}
                         size="sm"
@@ -181,11 +180,15 @@ const PlansPage = () => {
                   </Card>
                 ))
               ) : (
-                <div className="text-center py-4">No available plans to enroll in</div>
+                <div className="text-center py-4">
+                  No available plans to enroll in
+                </div>
               )}
             </div>
             <DialogFooter>
-              <Button variant="outline" onClick={() => setDialogOpen(false)}>Cancel</Button>
+              <Button variant="outline" onClick={() => setDialogOpen(false)}>
+                Cancel
+              </Button>
             </DialogFooter>
           </DialogContent>
         </Dialog>
@@ -227,12 +230,13 @@ const PlansPage = () => {
                 const nextWorkout = getNextWorkout(userPlan);
                 const completedWorkouts = getCompletedWorkoutsCount(userPlan);
                 const totalWorkouts = userPlan.workouts.length;
-                
+
                 return (
                   <Card key={userPlan.uuid} className="flex flex-col h-full">
                     <CardHeader>
                       <CardTitle className="text-xl">
-                        Training Plan (Started {format(new Date(userPlan.start_date), 'PP')})
+                        Training Plan (Started{" "}
+                        {format(new Date(userPlan.start_date), "PP")})
                       </CardTitle>
                     </CardHeader>
                     <CardContent className="flex-1 flex flex-col">
@@ -240,26 +244,38 @@ const PlansPage = () => {
                         <div className="flex items-center mb-2">
                           <Calendar className="h-4 w-4 mr-2 text-muted-foreground" />
                           <span className="text-sm font-medium">
-                            {totalWorkouts} workouts • {completedWorkouts} completed
+                            {totalWorkouts} workouts • {completedWorkouts}{" "}
+                            completed
                           </span>
                         </div>
-                        
+
                         <div className="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700 mb-3">
-                          <div 
-                            className="bg-fitness-500 h-2.5 rounded-full" 
-                            style={{ width: `${(completedWorkouts / totalWorkouts) * 100}%` }}
+                          <div
+                            className="bg-fitness-500 h-2.5 rounded-full"
+                            style={{
+                              width: `${(completedWorkouts / totalWorkouts) * 100}%`,
+                            }}
                           ></div>
                         </div>
 
                         <div className="space-y-2 mt-4">
-                          <h4 className="font-medium mb-1 text-sm">Next workout:</h4>
+                          <h4 className="font-medium mb-1 text-sm">
+                            Next workout:
+                          </h4>
                           {nextWorkout ? (
                             <div className="flex justify-between text-sm p-2 bg-muted rounded-md">
-                              <span>{format(new Date(nextWorkout.date), 'PP')}</span>
-                              <span>Workout ID: {nextWorkout.workout.substring(0, 6)}...</span>
+                              <span>
+                                {format(new Date(nextWorkout.date), "PP")}
+                              </span>
+                              <span>
+                                {nextWorkout.name.substring(0, 20)}
+                                ...
+                              </span>
                             </div>
                           ) : (
-                            <p className="text-sm text-muted-foreground">No upcoming workouts</p>
+                            <p className="text-sm text-muted-foreground">
+                              No upcoming workouts
+                            </p>
                           )}
                         </div>
                       </div>
@@ -267,11 +283,14 @@ const PlansPage = () => {
                       <div className="flex justify-between mt-auto items-center">
                         <div className="flex items-center">
                           <CalendarCheck className="h-4 w-4 mr-2 text-fitness-500" />
-                          <span className="text-sm">{completedWorkouts}/{totalWorkouts}</span>
+                          <span className="text-sm">
+                            {completedWorkouts}/{totalWorkouts}
+                          </span>
                         </div>
                         <Button asChild size="sm" variant="outline">
                           <Link to={`/plans/${userPlan.uuid}`}>
-                            View Calendar <ArrowRight className="ml-1 h-4 w-4" />
+                            View Calendar{" "}
+                            <ArrowRight className="ml-1 h-4 w-4" />
                           </Link>
                         </Button>
                       </div>
@@ -309,7 +328,9 @@ const PlansPage = () => {
                         <Card key={plan.uuid} className="overflow-hidden">
                           <CardHeader className="pb-2">
                             <div className="flex justify-between items-start">
-                              <CardTitle className="text-lg">{plan.name}</CardTitle>
+                              <CardTitle className="text-lg">
+                                {plan.name}
+                              </CardTitle>
                               <Badge
                                 variant={plan.public ? "default" : "outline"}
                                 className={plan.public ? "bg-fitness-500" : ""}
@@ -325,7 +346,7 @@ const PlansPage = () => {
                             <span className="text-xs text-muted-foreground">
                               {plan.workouts.length} workouts
                             </span>
-                            <Button 
+                            <Button
                               onClick={() => handleEnrollInPlan(plan.uuid)}
                               disabled={enrollLoading}
                               size="sm"
@@ -336,11 +357,18 @@ const PlansPage = () => {
                         </Card>
                       ))
                     ) : (
-                      <div className="text-center py-4">No available plans to enroll in</div>
+                      <div className="text-center py-4">
+                        No available plans to enroll in
+                      </div>
                     )}
                   </div>
                   <DialogFooter>
-                    <Button variant="outline" onClick={() => setDialogOpen(false)}>Cancel</Button>
+                    <Button
+                      variant="outline"
+                      onClick={() => setDialogOpen(false)}
+                    >
+                      Cancel
+                    </Button>
                   </DialogFooter>
                 </DialogContent>
               </Dialog>

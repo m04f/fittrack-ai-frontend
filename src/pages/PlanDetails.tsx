@@ -1,23 +1,41 @@
-
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { 
-  CalendarIcon, 
-  CheckCircle2, 
-  Clock, 
-  ArrowRight, 
+import {
+  CalendarIcon,
+  CheckCircle2,
+  Clock,
+  ArrowRight,
   CalendarDaysIcon,
-  ChevronRight
+  ChevronRight,
 } from "lucide-react";
 import api from "@/services/api";
 import { UserPlan, Plan } from "@/types/api";
 import { Skeleton } from "@/components/ui/skeleton";
-import { format, parseISO, isToday, isBefore, isAfter, addDays } from "date-fns";
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import {
+  format,
+  parseISO,
+  isToday,
+  isBefore,
+  isAfter,
+  addDays,
+} from "date-fns";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { Progress } from "@/components/ui/progress";
-import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 
@@ -34,15 +52,15 @@ const PlanDetails = () => {
       try {
         // Fetch the user's plan
         const userPlanData = await api.getUserPlans();
-        const currentPlan = userPlanData.find(p => p.uuid === planId);
-        
+        const currentPlan = userPlanData.find((p) => p.uuid === planId);
+
         if (!currentPlan) {
           toast.error("Plan not found");
           return;
         }
-        
+
         setUserPlan(currentPlan);
-        
+
         // Also fetch the plan details to get the name and description
         const planData = await api.getPlan(currentPlan.plan);
         setPlanDetails(planData);
@@ -60,40 +78,44 @@ const PlanDetails = () => {
   }, [planId]);
 
   // Count completed workouts for progress
-  const completedCount = userPlan?.workouts?.filter(w => w.record !== null).length || 0;
+  const completedCount =
+    userPlan?.workouts?.filter((w) => w.record !== null).length || 0;
   const totalWorkouts = userPlan?.workouts?.length || 0;
-  const progressPercentage = totalWorkouts > 0 ? (completedCount / totalWorkouts) * 100 : 0;
+  const progressPercentage =
+    totalWorkouts > 0 ? (completedCount / totalWorkouts) * 100 : 0;
 
   // Group workouts by week
   const groupWorkoutsByWeek = () => {
     if (!userPlan?.workouts) return [];
-    
-    const sortedWorkouts = [...userPlan.workouts].sort((a, b) => 
-      new Date(a.date).getTime() - new Date(b.date).getTime()
+
+    const sortedWorkouts = [...userPlan.workouts].sort(
+      (a, b) => new Date(a.date).getTime() - new Date(b.date).getTime(),
     );
-    
+
     const weeks: Array<{
       weekStart: Date;
       workouts: typeof sortedWorkouts;
       isCurrentWeek: boolean;
     }> = [];
-    
+
     let currentWeekStart: Date | null = null;
     let currentWeekWorkouts: typeof sortedWorkouts = [];
-    
-    sortedWorkouts.forEach(workout => {
+
+    sortedWorkouts.forEach((workout) => {
       const workoutDate = parseISO(workout.date);
-      
+
       if (!currentWeekStart) {
         // First workout defines the first week
         currentWeekStart = new Date(workoutDate);
-        currentWeekStart.setDate(currentWeekStart.getDate() - currentWeekStart.getDay());
+        currentWeekStart.setDate(
+          currentWeekStart.getDate() - currentWeekStart.getDay(),
+        );
         currentWeekWorkouts.push(workout);
       } else {
         // Check if this workout is in the same week
         const nextWeekStart = new Date(currentWeekStart);
         nextWeekStart.setDate(nextWeekStart.getDate() + 7);
-        
+
         if (workoutDate < nextWeekStart) {
           // Same week
           currentWeekWorkouts.push(workout);
@@ -102,45 +124,53 @@ const PlanDetails = () => {
           weeks.push({
             weekStart: new Date(currentWeekStart),
             workouts: [...currentWeekWorkouts],
-            isCurrentWeek: isCurrentWeek(currentWeekStart)
+            isCurrentWeek: isCurrentWeek(currentWeekStart),
           });
-          
+
           // Reset for new week
           currentWeekStart = new Date(workoutDate);
-          currentWeekStart.setDate(currentWeekStart.getDate() - currentWeekStart.getDay());
+          currentWeekStart.setDate(
+            currentWeekStart.getDate() - currentWeekStart.getDay(),
+          );
           currentWeekWorkouts = [workout];
         }
       }
     });
-    
+
     // Add the last week
     if (currentWeekStart && currentWeekWorkouts.length > 0) {
       weeks.push({
         weekStart: new Date(currentWeekStart),
         workouts: [...currentWeekWorkouts],
-        isCurrentWeek: isCurrentWeek(currentWeekStart)
+        isCurrentWeek: isCurrentWeek(currentWeekStart),
       });
     }
-    
+
     return weeks;
   };
-  
+
   const isCurrentWeek = (weekStart: Date) => {
     const today = new Date();
     const weekEnd = new Date(weekStart);
     weekEnd.setDate(weekEnd.getDate() + 6);
-    
+
     return today >= weekStart && today <= weekEnd;
   };
 
-  const handleWorkoutClick = (workoutUuid: string, workoutId: string) => {
-    navigate(`/workouts/${workoutId}?planday=${workoutUuid}`);
+  const handleWorkoutClick = (
+    workoutUuid: string,
+    workoutId: string,
+    planUuid: string,
+  ) => {
+    navigate(
+      `/workouts/${workoutId}?planworkout=${workoutUuid}&plan=${planUuid}`,
+    );
   };
 
   const getWorkoutStatusClass = (date: string, hasRecord: boolean) => {
     const workoutDate = parseISO(date);
     const today = new Date();
-    
+
     if (hasRecord) {
       return "bg-green-50 hover:bg-green-100 border-green-200";
     } else if (isToday(workoutDate)) {
@@ -155,7 +185,7 @@ const PlanDetails = () => {
   const getWorkoutStatusText = (date: string, hasRecord: boolean) => {
     const workoutDate = parseISO(date);
     const today = new Date();
-    
+
     if (hasRecord) {
       return "Completed";
     } else if (isToday(workoutDate)) {
@@ -205,8 +235,10 @@ const PlanDetails = () => {
           </div>
         </CardHeader>
         <CardContent>
-          <p className="text-muted-foreground mb-4">{planDetails.description}</p>
-          
+          <p className="text-muted-foreground mb-4">
+            {planDetails.description}
+          </p>
+
           <div className="flex items-center justify-between mb-2">
             <div className="flex items-center">
               <CalendarIcon className="h-4 w-4 mr-2 text-muted-foreground" />
@@ -214,24 +246,32 @@ const PlanDetails = () => {
                 Progress: {completedCount} of {totalWorkouts} workouts completed
               </span>
             </div>
-            <span className="text-sm font-medium">{progressPercentage.toFixed(0)}%</span>
+            <span className="text-sm font-medium">
+              {progressPercentage.toFixed(0)}%
+            </span>
           </div>
           <Progress value={progressPercentage} className="h-2 mb-6" />
 
           {/* Workout Schedule */}
           <div className="space-y-6">
             {weeks.map((week, weekIndex) => (
-              <Card key={week.weekStart.toISOString()} className={`overflow-hidden ${week.isCurrentWeek ? 'border-blue-300 shadow-sm' : ''}`}>
+              <Card
+                key={week.weekStart.toISOString()}
+                className={`overflow-hidden ${week.isCurrentWeek ? "border-blue-300 shadow-sm" : ""}`}
+              >
                 <CardHeader className="py-2 px-4 bg-muted/40">
                   <div className="flex justify-between items-center">
                     <div className="flex items-center">
                       <CalendarDaysIcon className="h-4 w-4 mr-2 text-muted-foreground" />
                       <h3 className="text-sm font-medium">
-                        Week {weekIndex + 1}: {format(week.weekStart, "MMM d")} - {format(addDays(week.weekStart, 6), "MMM d")}
+                        Week {weekIndex + 1}: {format(week.weekStart, "MMM d")}{" "}
+                        - {format(addDays(week.weekStart, 6), "MMM d")}
                       </h3>
                     </div>
                     {week.isCurrentWeek && (
-                      <Badge variant="secondary" className="text-xs">Current Week</Badge>
+                      <Badge variant="secondary" className="text-xs">
+                        Current Week
+                      </Badge>
                     )}
                   </div>
                 </CardHeader>
@@ -241,17 +281,27 @@ const PlanDetails = () => {
                       <TableRow>
                         <TableHead className="w-[100px]">Date</TableHead>
                         <TableHead>Workout</TableHead>
-                        <TableHead className="w-[100px] text-right">Status</TableHead>
+                        <TableHead className="w-[100px] text-right">
+                          Status
+                        </TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody>
-                      {week.workouts.map(workout => (
-                        <TableRow 
+                      {week.workouts.map((workout) => (
+                        <TableRow
                           key={workout.uuid}
                           className={`cursor-pointer ${getWorkoutStatusClass(workout.date, workout.record !== null)}`}
-                          onClick={() => handleWorkoutClick(workout.uuid, workout.workout)}
+                          onClick={() =>
+                            handleWorkoutClick(
+                              workout.uuid,
+                              workout.workout,
+                              planId,
+                            )
+                          }
                         >
-                          <TableCell className="font-medium">{format(parseISO(workout.date), "EEE, MMM d")}</TableCell>
+                          <TableCell className="font-medium">
+                            {format(parseISO(workout.date), "EEE, MMM d")}
+                          </TableCell>
                           <TableCell>Workout Plan</TableCell>
                           <TableCell className="text-right">
                             <TooltipProvider>
@@ -262,21 +312,29 @@ const PlanDetails = () => {
                                       <CheckCircle2 className="h-4 w-4 text-green-500 mr-1" />
                                     ) : isToday(parseISO(workout.date)) ? (
                                       <Clock className="h-4 w-4 text-blue-500 mr-1" />
-                                    ) : isBefore(parseISO(workout.date), new Date()) ? (
+                                    ) : isBefore(
+                                        parseISO(workout.date),
+                                        new Date(),
+                                      ) ? (
                                       <Clock className="h-4 w-4 text-amber-500 mr-1" />
                                     ) : (
                                       <ArrowRight className="h-4 w-4 text-gray-500 mr-1" />
                                     )}
-                                    <span className={`text-sm ${workout.record ? 'text-green-700' : ''}`}>
-                                      {getWorkoutStatusText(workout.date, workout.record !== null)}
+                                    <span
+                                      className={`text-sm ${workout.record ? "text-green-700" : ""}`}
+                                    >
+                                      {getWorkoutStatusText(
+                                        workout.date,
+                                        workout.record !== null,
+                                      )}
                                     </span>
                                     <ChevronRight className="h-4 w-4 ml-1 text-muted-foreground" />
                                   </div>
                                 </TooltipTrigger>
                                 <TooltipContent>
                                   <p>
-                                    {workout.record !== null 
-                                      ? "Workout completed" 
+                                    {workout.record !== null
+                                      ? "Workout completed"
                                       : "Click to start workout"}
                                   </p>
                                 </TooltipContent>
@@ -291,7 +349,7 @@ const PlanDetails = () => {
               </Card>
             ))}
           </div>
-          
+
           <div className="grid grid-cols-2 gap-2 mt-6">
             <div className="flex items-center p-2 rounded-md bg-gray-50">
               <ArrowRight className="h-4 w-4 mr-2 text-gray-600" />
@@ -310,11 +368,11 @@ const PlanDetails = () => {
               <span className="text-sm">Completed workout</span>
             </div>
           </div>
-          
-          <Button 
-            variant="outline" 
-            className="w-full mt-6" 
-            onClick={() => navigate('/plans')}
+
+          <Button
+            variant="outline"
+            className="w-full mt-6"
+            onClick={() => navigate("/plans")}
           >
             Back to Plans
           </Button>
