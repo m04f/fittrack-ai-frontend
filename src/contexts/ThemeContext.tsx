@@ -16,6 +16,15 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     user?.frontend_settings?.displaySettings?.darkMode || false
   );
 
+  // Apply theme on initial load
+  useEffect(() => {
+    if (isDarkMode) {
+      document.documentElement.classList.add("dark");
+    } else {
+      document.documentElement.classList.remove("dark");
+    }
+  }, []);
+
   useEffect(() => {
     // Update the dark mode setting when the user's settings change
     if (user?.frontend_settings?.displaySettings) {
