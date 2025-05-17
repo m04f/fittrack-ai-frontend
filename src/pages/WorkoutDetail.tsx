@@ -82,11 +82,14 @@ const WorkoutDetail = () => {
       const workoutRecord = await api.createWorkoutRecord({
         workout: workout.uuid,
       });
-      await api.setPlanWorkoutRecord({
-        record: workoutRecord.uuid,
-        plan: plan,
-        workout: planworkout,
-      });
+
+      if (plan && planworkout) {
+        await api.setPlanWorkoutRecord({
+          record: workoutRecord.uuid,
+          plan: plan,
+          workout: planworkout,
+        });
+      }
 
       toast.success("Workout started successfully!");
 
