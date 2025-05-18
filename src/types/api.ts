@@ -101,7 +101,9 @@ export interface ExerciseRecord {
 export interface WorkoutRecord {
   uuid: string;
   workout: string;
+  workout_name: string;
   exercises: ExerciseRecord[];
+  datetime: string;
   planday?: string | null;
   duration?: number; // Duration in seconds
 }

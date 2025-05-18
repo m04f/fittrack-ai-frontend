@@ -190,6 +190,10 @@ class ApiService {
     }>("/user/workouts/");
   }
 
+  async getUserWorkoutRecords() {
+    return this.request<WorkoutRecord[]>("/user/workouts");
+  }
+
   async getUserWorkoutRecord(uuid: string) {
     return this.request<WorkoutRecord>(`/user/workouts/${uuid}/`);
   }
