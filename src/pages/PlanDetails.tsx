@@ -233,6 +233,31 @@ const PlanDetails = () => {
               {planDetails.public ? "Public" : "Private"}
             </Badge>
           </div>
+          <div className="flex flex-row gap-4 mb-6">
+            <Button
+              variant="destructive"
+              className="flex-1"
+              onClick={async () => {
+                try {
+                  await api.unenrollFromPlan(planId);
+                  toast.success("Successfully unenrolled from the plan");
+                  navigate("/plans");
+                } catch (error) {
+                  console.error("Error unenrolling from plan:", error);
+                  toast.error("Failed to unenroll from the plan");
+                }
+              }}
+            >
+              Unenroll from Plan
+            </Button>
+            <Button
+              variant="outline"
+              className="flex-1"
+              onClick={() => navigate("/plans")}
+            >
+              Back to Plans
+            </Button>
+          </div>
         </CardHeader>
         <CardContent>
           <p className="text-muted-foreground mb-4">
@@ -369,13 +394,31 @@ const PlanDetails = () => {
             </div>
           </div>
 
-          <Button
-            variant="outline"
-            className="w-full mt-6"
-            onClick={() => navigate("/plans")}
-          >
-            Back to Plans
-          </Button>
+          <div className="flex flex-col gap-4 mt-6">
+            <Button
+              variant="destructive"
+              className="w-full"
+              onClick={async () => {
+                try {
+                  await api.unenrollFromPlan(planId);
+                  toast.success("Successfully unenrolled from the plan");
+                  navigate("/plans");
+                } catch (error) {
+                  console.error("Error unenrolling from plan:", error);
+                  toast.error("Failed to unenroll from the plan");
+                }
+              }}
+            >
+              Unenroll from Plan
+            </Button>
+            <Button
+              variant="outline"
+              className="w-full"
+              onClick={() => navigate("/plans")}
+            >
+              Back to Plans
+            </Button>
+          </div>
         </CardContent>
       </Card>
     </div>
