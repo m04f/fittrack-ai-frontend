@@ -249,6 +249,12 @@ class ApiService {
     });
   }
 
+  async unenrollFromPlan(planId: string) {
+    return this.request<void>(`/user/plans/${planId}/`, {
+      method: "DELETE",
+    });
+  }
+
   async updateUserPlanWorkout(
     planUuid: string,
     workoutUuid: string,

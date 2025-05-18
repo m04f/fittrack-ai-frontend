@@ -171,10 +171,19 @@ const PlansPage = () => {
                       </span>
                       <Button
                         onClick={() => handleEnrollInPlan(plan.uuid)}
-                        disabled={enrollLoading}
+                        disabled={
+                          enrollLoading ||
+                          userPlans.some(
+                            (userPlan) => userPlan.plan === plan.uuid,
+                          )
+                        }
                         size="sm"
                       >
-                        Enroll
+                        {userPlans.some(
+                          (userPlan) => userPlan.plan === plan.uuid,
+                        )
+                          ? "Enrolled"
+                          : "Enroll"}
                       </Button>
                     </CardFooter>
                   </Card>
