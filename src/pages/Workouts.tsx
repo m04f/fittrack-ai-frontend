@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from "react";
 import {
   Card,
@@ -17,6 +18,7 @@ import {
   Filter,
   ArrowRight,
   Clock,
+  History,
 } from "lucide-react";
 import api from "@/services/api";
 import { Workout } from "@/types/api";
@@ -178,6 +180,12 @@ const WorkoutsPage = () => {
           />
         </div>
         <div className="flex gap-2">
+          <Button variant="outline" asChild>
+            <Link to="/history">
+              <History className="mr-2 h-4 w-4" />
+              History
+            </Link>
+          </Button>
           <Button variant="outline">
             <Filter className="mr-2 h-4 w-4" />
             Filter
