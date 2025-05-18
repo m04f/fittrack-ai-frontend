@@ -3,7 +3,7 @@ import React from "react";
 import { Outlet, useNavigate } from "react-router-dom";
 import { SidebarProvider, Sidebar, SidebarContent, SidebarTrigger, SidebarGroup, SidebarGroupLabel, SidebarGroupContent, SidebarMenu, SidebarMenuItem, SidebarMenuButton } from "@/components/ui/sidebar";
 import { useAuth } from "@/contexts/AuthContext";
-import { Home, Dumbbell, CalendarCheck, MessageCircle, FileText, Settings, User, LogOut } from "lucide-react";
+import { Home, Dumbbell, MessageCircle, FileText, Settings, User, LogOut, CalendarCheck } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Avatar, AvatarImage, AvatarFallback } from "@/components/ui/avatar";
 
@@ -14,7 +14,7 @@ const AppLayout = () => {
   const menuItems = [
     { icon: Home, label: "Dashboard", path: "/dashboard" },
     { icon: Dumbbell, label: "Workouts", path: "/workouts" },
-    { icon: CalendarCheck, label: "Record", path: "/record" },
+    { icon: CalendarCheck, label: "History", path: "/history" },
     { icon: FileText, label: "Plans", path: "/plans" },
     { icon: MessageCircle, label: "Chat", path: "/chat" },
     { icon: User, label: "Profile", path: "/profile" },

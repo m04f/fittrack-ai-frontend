@@ -14,7 +14,7 @@ import Dashboard from "./pages/Dashboard";
 import Workouts from "./pages/Workouts";
 import WorkoutDetail from "./pages/WorkoutDetail";
 import WorkoutRecordDetail from "./pages/WorkoutRecordDetail";
-import WorkoutHistory from "./pages/WorkoutHistory"; // Replace RecordWorkout with WorkoutHistory
+import WorkoutHistory from "./pages/WorkoutHistory";
 import CreateWorkout from "./pages/CreateWorkout";
 import Plans from "./pages/Plans";
 import Chat from "./pages/Chat";
@@ -48,7 +48,7 @@ const App = () => (
                   <Route path="/workouts" element={<Workouts />} />
                   <Route path="/workouts/:id" element={<WorkoutDetail />} />
                   <Route path="/workout-record/:id" element={<WorkoutRecordDetail />} />
-                  <Route path="/history" element={<WorkoutHistory />} /> {/* Changed from /record to /history */}
+                  <Route path="/history" element={<WorkoutHistory />} /> 
                   <Route path="/workouts/create" element={<CreateWorkout />} />
                   <Route path="/plans" element={<Plans />} />
                   <Route path="/plans/:planId" element={<PlanDetails />} />

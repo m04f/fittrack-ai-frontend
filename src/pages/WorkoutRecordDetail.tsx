@@ -1,6 +1,5 @@
-
 import { useState, useEffect, useRef } from "react";
-import { useParams, Link, useNavigate } from "react-router-dom";
+import { useParams, Link, useNavigate, useLocation } from "react-router-dom";
 import {
   Card,
   CardContent,
@@ -48,6 +47,7 @@ import { toast } from "sonner";
 import { Progress } from "@/components/ui/progress";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { format } from "date-fns";
 
 const WorkoutRecordDetail = () => {
   const { id } = useParams<{ id: string }>();
@@ -60,6 +60,10 @@ const WorkoutRecordDetail = () => {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const navigate = useNavigate();
+  const location = useLocation();
+  
+  // Check if we're viewing from history (read-only mode)
+  const isReadOnly = location.pathname.includes('/workout-record/');
 
   // Rest timer state
   const [restTimerActive, setRestTimerActive] = useState(false);
@@ -132,8 +136,13 @@ const WorkoutRecordDetail = () => {
           setExerciseRecords(initialExercises);
         }
 
-        // Initialize the workout timer
-        setWorkoutStartTime(new Date());
+        // Initialize the workout timer only if not in read-only mode
+        if (!isReadOnly) {
+          setWorkoutStartTime(new Date());
+        } else if (recordData.duration) {
+          // In read-only mode, set elapsed time from the record
+          setElapsedTime(recordData.duration);
+        }
       } catch (error) {
         console.error("Error fetching workout record data:", error);
         toast.error("Failed to load workout record");
@@ -150,7 +159,7 @@ const WorkoutRecordDetail = () => {
         clearInterval(workoutTimerInterval.current);
       }
     };
-  }, [id]);
+  }, [id, isReadOnly]);
 
   // Rest timer effect
   useEffect(() => {
@@ -383,6 +392,10 @@ const WorkoutRecordDetail = () => {
     return Math.min(100, Math.round((completedSetsCount / totalSets) * 100));
   };
 
+  const formatDate = (dateString: string) => {
+    return format(new Date(dateString), "PPP 'at' p");
+  };
+
   if (loading) {
     return (
       <div className="animate-enter space-y-6">
@@ -403,17 +416,23 @@ const WorkoutRecordDetail = () => {
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2">
           <Button variant="outline" size="icon" asChild>
-            <Link to="/workouts">
+            <Link to={isReadOnly ? "/history" : "/workouts"}>
               <ArrowLeft className="h-4 w-4" />
             </Link>
           </Button>
           <h1 className="text-3xl font-bold tracking-tight">
-            Recording: {workout?.name}
+            {isReadOnly ? "Workout Record: " : "Recording: "}{workout?.name}
           </h1>
         </div>
         <div className="flex items-center gap-2">
           <Clock className="h-5 w-5 text-muted-foreground" />
-          <span className="font-medium">{formatElapsedTime(elapsedTime)}</span>
+          <span className="font-medium">
+            {isReadOnly && workoutRecord?.datetime ? (
+              <span>{formatDate(workoutRecord.datetime)}</span>
+            ) : (
+              formatElapsedTime(elapsedTime)
+            )}
+          </span>
         </div>
       </div>
 
@@ -426,115 +445,125 @@ const WorkoutRecordDetail = () => {
             </Badge>
           </CardTitle>
           <CardDescription>
-            Track your overall workout completion
+            {isReadOnly 
+              ? "Completed workout record" 
+              : "Track your overall workout completion"}
           </CardDescription>
           <Progress value={calculateWorkoutProgress()} className="h-2" />
         </CardHeader>
       </Card>
 
       {/* Rest Timer Dialog */}
-      <Dialog open={restTimerActive} onOpenChange={(open) => !open && setRestTimerActive(false)}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle className="flex justify-between items-center">
-              <div className="flex items-center">
-                <Timer className="h-5 w-5 text-fitness-600 mr-2" />
-                Rest Timer
+      {!isReadOnly && (
+        <Dialog open={restTimerActive} onOpenChange={(open) => !open && setRestTimerActive(false)}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex justify-between items-center">
+                <div className="flex items-center">
+                  <Timer className="h-5 w-5 text-fitness-600 mr-2" />
+                  Rest Timer
+                </div>
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  className="h-8 w-8 p-0" 
+                  onClick={() => setRestTimerActive(false)}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </DialogTitle>
+            </DialogHeader>
+            <div className="flex flex-col items-center py-4 space-y-4">
+              <div className="text-4xl font-bold text-fitness-600">
+                {formatTime(restTimeRemaining)}
               </div>
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                className="h-8 w-8 p-0" 
-                onClick={() => setRestTimerActive(false)}
-              >
-                <X className="h-4 w-4" />
-              </Button>
-            </DialogTitle>
-          </DialogHeader>
-          <div className="flex flex-col items-center py-4 space-y-4">
-            <div className="text-4xl font-bold text-fitness-600">
-              {formatTime(restTimeRemaining)}
-            </div>
-            <Progress
-              value={(restTimeRemaining / (exerciseRecords[activeExerciseIndex as number]?.rest || 1)) * 100}
-              className="h-2 w-full"
-            />
-            <p className="text-sm text-muted-foreground">
-              Resting after {exerciseRecords[activeExerciseIndex as number]?.exercise}
-            </p>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => {
-                clearInterval(timerInterval.current as number);
-                setRestTimerActive(false);
-              }}
-            >
-              Skip Rest
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
-
-      {/* Exercise Timer Dialog */}
-      <Dialog open={exerciseTimerActive} onOpenChange={(open) => !open && cancelExerciseTimer()}>
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle className="flex justify-between items-center">
-              <div className="flex items-center">
-                <Dumbbell className="h-5 w-5 text-fitness-600 mr-2" />
-                Exercise Timer
-              </div>
-              <Button 
-                variant="ghost" 
-                size="icon" 
-                className="h-8 w-8 p-0" 
-                onClick={cancelExerciseTimer}
-              >
-                <X className="h-4 w-4" />
-              </Button>
-            </DialogTitle>
-          </DialogHeader>
-          <div className="flex flex-col items-center py-4 space-y-4">
-            <div className="text-4xl font-bold text-fitness-600">
-              {formatTime(exerciseTimeRemaining)}
-            </div>
-            <Progress
-              value={(exerciseTimeRemaining / (exerciseRecords[activeExerciseTimerIndex as number]?.duration || 1)) * 100}
-              className="h-2 w-full"
-            />
-            <p className="text-sm text-muted-foreground">
-              {exerciseRecords[activeExerciseTimerIndex as number]?.exercise}
-            </p>
-            <div className="flex space-x-2">
+              <Progress
+                value={(restTimeRemaining / (exerciseRecords[activeExerciseIndex as number]?.rest || 1)) * 100}
+                className="h-2 w-full"
+              />
+              <p className="text-sm text-muted-foreground">
+                Resting after {exerciseRecords[activeExerciseIndex as number]?.exercise}
+              </p>
               <Button
                 variant="outline"
                 size="sm"
-                onClick={cancelExerciseTimer}
-              >
-                Cancel
-              </Button>
-              <Button
-                size="sm"
-                className="bg-fitness-600 hover:bg-fitness-700"
                 onClick={() => {
-                  cancelExerciseTimer();
-                  if (activeExerciseTimerIndex !== null) {
-                    handleAddExercise(activeExerciseTimerIndex);
-                  }
+                  clearInterval(timerInterval.current as number);
+                  setRestTimerActive(false);
                 }}
               >
-                Complete Now
+                Skip Rest
               </Button>
             </div>
-          </div>
-        </DialogContent>
-      </Dialog>
+          </DialogContent>
+        </Dialog>
+      )}
+
+      {/* Exercise Timer Dialog */}
+      {!isReadOnly && (
+        <Dialog open={exerciseTimerActive} onOpenChange={(open) => !open && cancelExerciseTimer()}>
+          <DialogContent className="sm:max-w-md">
+            <DialogHeader>
+              <DialogTitle className="flex justify-between items-center">
+                <div className="flex items-center">
+                  <Dumbbell className="h-5 w-5 text-fitness-600 mr-2" />
+                  Exercise Timer
+                </div>
+                <Button 
+                  variant="ghost" 
+                  size="icon" 
+                  className="h-8 w-8 p-0" 
+                  onClick={cancelExerciseTimer}
+                >
+                  <X className="h-4 w-4" />
+                </Button>
+              </DialogTitle>
+            </DialogHeader>
+            <div className="flex flex-col items-center py-4 space-y-4">
+              <div className="text-4xl font-bold text-fitness-600">
+                {formatTime(exerciseTimeRemaining)}
+              </div>
+              <Progress
+                value={(exerciseTimeRemaining / (exerciseRecords[activeExerciseTimerIndex as number]?.duration || 1)) * 100}
+                className="h-2 w-full"
+              />
+              <p className="text-sm text-muted-foreground">
+                {exerciseRecords[activeExerciseTimerIndex as number]?.exercise}
+              </p>
+              <div className="flex space-x-2">
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={cancelExerciseTimer}
+                >
+                  Cancel
+                </Button>
+                <Button
+                  size="sm"
+                  className="bg-fitness-600 hover:bg-fitness-700"
+                  onClick={() => {
+                    cancelExerciseTimer();
+                    if (activeExerciseTimerIndex !== null) {
+                      handleAddExercise(activeExerciseTimerIndex);
+                    }
+                  }}
+                >
+                  Complete Now
+                </Button>
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+      )}
 
       <Card>
         <CardHeader>
-          <CardTitle>Exercise Progress</CardTitle>
-          <CardDescription>Record your sets for each exercise</CardDescription>
+          <CardTitle>{isReadOnly ? "Exercise Records" : "Exercise Progress"}</CardTitle>
+          <CardDescription>
+            {isReadOnly 
+              ? "View completed sets for each exercise"
+              : "Record your sets for each exercise"}
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <Table>
@@ -546,7 +575,7 @@ const WorkoutRecordDetail = () => {
                 <TableHead>Duration (sec)</TableHead>
                 <TableHead>Rest (sec)</TableHead>
                 <TableHead>Effort</TableHead>
-                <TableHead>Action</TableHead>
+                {!isReadOnly && <TableHead>Action</TableHead>}
               </TableRow>
             </TableHeader>
             <TableBody>
@@ -557,14 +586,13 @@ const WorkoutRecordDetail = () => {
                 const exerciseProgress = calculateExerciseProgress(
                   exercise.exercise,
                 );
-                const isTimerActive = activeExerciseTimerIndex === index;
 
                 return (
                   <TableRow
                     key={`${exercise.exercise}-${index}`}
                     className={
-                      (activeExerciseIndex === index && restTimerActive) ||
-                      (activeExerciseTimerIndex === index && exerciseTimerActive)
+                      !isReadOnly && ((activeExerciseIndex === index && restTimerActive) ||
+                      (activeExerciseTimerIndex === index && exerciseTimerActive))
                         ? "bg-muted/30"
                         : ""
                     }
@@ -601,121 +629,136 @@ const WorkoutRecordDetail = () => {
                       </div>
                     </TableCell>
                     <TableCell>
-                      <Input
-                        type="number"
-                        min="0"
-                        className="w-20"
-                        value={exercise.reps || ""}
-                        onChange={(e) =>
-                          handleExerciseChange(
-                            index,
-                            "reps",
-                            e.target.value ? parseInt(e.target.value) : null,
-                          )
-                        }
-                      />
-                    </TableCell>
-                    <TableCell>
-                      <Input
-                        type="number"
-                        min="0"
-                        step="0.5"
-                        className="w-20"
-                        value={exercise.weight || ""}
-                        onChange={(e) =>
-                          handleExerciseChange(
-                            index,
-                            "weight",
-                            e.target.value ? parseFloat(e.target.value) : null,
-                          )
-                        }
-                      />
-                    </TableCell>
-                    <TableCell>
-                      <Input
-                        type="number"
-                        min="0"
-                        className="w-20"
-                        value={exercise.duration || ""}
-                        onChange={(e) =>
-                          handleExerciseChange(
-                            index,
-                            "duration",
-                            e.target.value ? parseInt(e.target.value) : null,
-                          )
-                        }
-                      />
-                    </TableCell>
-                    <TableCell>
-                      <Input
-                        type="number"
-                        min="0"
-                        className="w-20"
-                        value={exercise.rest || ""}
-                        onChange={(e) =>
-                          handleExerciseChange(
-                            index,
-                            "rest",
-                            e.target.value ? parseInt(e.target.value) : null,
-                          )
-                        }
-                      />
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex flex-col items-center mt-2">
-                        <input
-                          type="range"
-                          min="1"
-                          max="10"
-                          value={exercise.pre || 1}
+                      {isReadOnly ? (
+                        <span>{exercise.reps || "-"}</span>
+                      ) : (
+                        <Input
+                          type="number"
+                          min="0"
+                          className="w-20"
+                          value={exercise.reps || ""}
                           onChange={(e) =>
                             handleExerciseChange(
                               index,
-                              "pre",
-                              parseInt(e.target.value),
+                              "reps",
+                              e.target.value ? parseInt(e.target.value) : null,
                             )
                           }
-                          className="w-full"
                         />
-                        <span className="text-sm mt-1">
-                          Effort: {exercise.pre || 1}
-                        </span>
-                      </div>
+                      )}
                     </TableCell>
-                    <TableCell className="space-y-2">
-                      <div className="flex gap-2">
-                        <Button
-                          size="sm"
-                          onClick={() => handleAddExercise(index)}
-                          disabled={
-                            saving ||
-                            (activeExerciseIndex !== null && restTimerActive) ||
-                            exerciseTimerActive
+                    <TableCell>
+                      {isReadOnly ? (
+                        <span>{exercise.weight || "-"}</span>
+                      ) : (
+                        <Input
+                          type="number"
+                          min="0"
+                          step="0.5"
+                          className="w-20"
+                          value={exercise.weight || ""}
+                          onChange={(e) =>
+                            handleExerciseChange(
+                              index,
+                              "weight",
+                              e.target.value ? parseFloat(e.target.value) : null,
+                            )
                           }
-                          className="bg-fitness-600 hover:bg-fitness-700"
-                        >
-                          <Plus className="mr-1 h-4 w-4" /> Add Set
-                        </Button>
-                        
-                        {exercise.duration && exercise.duration > 0 && (
-                          <Button
-                            size="sm"
-                            variant="outline"
-                            onClick={() => startExerciseTimer(index)}
-                            disabled={exerciseTimerActive || restTimerActive}
-                          >
-                            <Timer className="mr-1 h-4 w-4" /> Start
-                          </Button>
-                        )}
-                      </div>
-                      
-                      {isTimerActive && exerciseTimerActive && (
-                        <div className="flex items-center text-xs text-fitness-600">
-                          <Timer className="h-3 w-3 mr-1" />
-                          Timer active: {formatTime(exerciseTimeRemaining)}
+                        />
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      {isReadOnly ? (
+                        <span>{exercise.duration || "-"}</span>
+                      ) : (
+                        <Input
+                          type="number"
+                          min="0"
+                          className="w-20"
+                          value={exercise.duration || ""}
+                          onChange={(e) =>
+                            handleExerciseChange(
+                              index,
+                              "duration",
+                              e.target.value ? parseInt(e.target.value) : null,
+                            )
+                          }
+                        />
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      {isReadOnly ? (
+                        <span>{exercise.rest || "-"}</span>
+                      ) : (
+                        <Input
+                          type="number"
+                          min="0"
+                          className="w-20"
+                          value={exercise.rest || ""}
+                          onChange={(e) =>
+                            handleExerciseChange(
+                              index,
+                              "rest",
+                              e.target.value ? parseInt(e.target.value) : null,
+                            )
+                          }
+                        />
+                      )}
+                    </TableCell>
+                    <TableCell>
+                      {isReadOnly ? (
+                        <span>{exercise.pre || "-"}/10</span>
+                      ) : (
+                        <div className="flex flex-col items-center mt-2">
+                          <input
+                            type="range"
+                            min="1"
+                            max="10"
+                            value={exercise.pre || 1}
+                            onChange={(e) =>
+                              handleExerciseChange(
+                                index,
+                                "pre",
+                                parseInt(e.target.value),
+                              )
+                            }
+                            className="w-full"
+                          />
+                          <span className="text-sm mt-1">
+                            Effort: {exercise.pre || 1}
+                          </span>
                         </div>
                       )}
                     </TableCell>
+                    {!isReadOnly && (
+                      <TableCell className="space-y-2">
+                        <div className="flex gap-2">
+                          <Button
+                            size="sm"
+                            onClick={() => handleAddExercise(index)}
+                            disabled={
+                              saving ||
+                              (activeExerciseIndex !== null && restTimerActive) ||
+                              exerciseTimerActive
+                            }
+                            className="bg-fitness-600 hover:bg-fitness-700"
+                          >
+                            <Plus className="mr-1 h-4 w-4" /> Add Set
+                          </Button>
+                          
+                          {exercise.duration && exercise.duration > 0 && (
+                            <Button
+                              size="sm"
+                              variant="outline"
+                              onClick={() => startExerciseTimer(index)}
+                              disabled={exerciseTimerActive || restTimerActive}
+                            >
+                              <Timer className="mr-1 h-4 w-4" /> Start
+                            </Button>
+                          )}
+                        </div>
+                      </TableCell>
+                    )}
                   </TableRow>
                 );
               })}
@@ -724,14 +767,18 @@ const WorkoutRecordDetail = () => {
         </CardContent>
         <CardFooter className="flex justify-between">
           <Button variant="outline" asChild>
-            <Link to="/workouts">Cancel</Link>
+            <Link to={isReadOnly ? "/history" : "/workouts"}>
+              {isReadOnly ? "Back to History" : "Cancel"}
+            </Link>
           </Button>
-          <Button
-            className="bg-fitness-600 hover:bg-fitness-700"
-            onClick={handleCompleteWorkout}
-          >
-            <Check className="mr-2 h-4 w-4" /> Complete Workout
-          </Button>
+          {!isReadOnly && (
+            <Button
+              className="bg-fitness-600 hover:bg-fitness-700"
+              onClick={handleCompleteWorkout}
+            >
+              <Check className="mr-2 h-4 w-4" /> Complete Workout
+            </Button>
+          )}
         </CardFooter>
       </Card>
       
