@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -160,8 +159,8 @@ const Dashboard = () => {
             ) : (
               <div className="text-center py-6">
                 <p className="text-muted-foreground">No workout records yet</p>
-                <Link to="/record">
-                  <Button className="mt-4 bg-fitness-600 hover:bg-fitness-700">Record a Workout</Button>
+                <Link to="/history">
+                  <Button className="mt-4 bg-fitness-600 hover:bg-fitness-700">View Workout History</Button>
                 </Link>
               </div>
             )}
