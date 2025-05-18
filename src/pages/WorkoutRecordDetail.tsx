@@ -1,3 +1,4 @@
+
 import { useState, useEffect, useRef } from "react";
 import { useParams, Link, useNavigate, useLocation } from "react-router-dom";
 import {
@@ -63,7 +64,8 @@ const WorkoutRecordDetail = () => {
   const location = useLocation();
   
   // Check if we're viewing from history (read-only mode)
-  const isReadOnly = location.pathname.includes('/workout-record/');
+  // Only consider it read-only if the URL path explicitly includes '/history/'
+  const isReadOnly = location.pathname.includes('/history/');
 
   // Rest timer state
   const [restTimerActive, setRestTimerActive] = useState(false);
