@@ -1,3 +1,4 @@
+import { useAuth } from "@/contexts/AuthContext";
 import { useEffect, useState } from "react";
 import { useSearchParams } from "react-router-dom";
 import { useParams, Link, useNavigate } from "react-router-dom";
@@ -36,6 +37,7 @@ import { toast } from "sonner";
 
 const WorkoutDetail = () => {
   const { id } = useParams<{ id: string }>();
+  const { user: currentUser } = useAuth();
   const [workout, setWorkout] = useState<Workout | null>(null);
   const [searchParams] = useSearchParams();
   const planworkout = searchParams.get("planworkout");
@@ -182,12 +184,42 @@ const WorkoutDetail = () => {
               <Play className="mr-2 h-4 w-4" />
               {startingWorkout ? "Starting..." : "Start Workout"}
             </Button>
-            <Button variant="outline">
-              <Edit className="mr-2 h-4 w-4" /> Edit Workout
-            </Button>
-            <Button variant="outline">
-              <Share className="mr-2 h-4 w-4" /> Share
-            </Button>
+            {workout?.creator === currentUser?.username && (
+              <>
+                <Button
+                  variant="outline"
+                  onClick={() => {
+                    if (workout) {
+                      navigate(`/create-workout?uuid=${workout.uuid}`);
+                    }
+                  }}
+                >
+                  <Edit className="mr-2 h-4 w-4" /> Edit Workout
+                </Button>
+                <Button
+                  variant="destructive"
+                  className="bg-red-600 hover:bg-red-700 text-white"
+                  onClick={() => {
+                    if (
+                      workout &&
+                      confirm("Are you sure you want to delete this workout?")
+                    ) {
+                      api
+                        .deleteWorkout(workout.uuid)
+                        .then(() => {
+                          toast.success("Workout deleted successfully!");
+                          navigate("/workouts");
+                        })
+                        .catch(() => {
+                          toast.error("Failed to delete workout");
+                        });
+                    }
+                  }}
+                >
+                  <Share className="mr-2 h-4 w-4" /> Delete Workout
+                </Button>
+              </>
+            )}
           </div>
 
           <Tabs defaultValue="exercises" className="w-full">

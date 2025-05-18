@@ -1,5 +1,5 @@
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
@@ -26,6 +26,7 @@ import api from "@/services/api";
 const CreateWorkout = () => {
   const navigate = useNavigate();
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [workoutId, setWorkoutId] = useState<string | null>(null);
   const [workout, setWorkout] = useState<Partial<Workout>>({
     name: "",
     description: "",
@@ -33,6 +34,22 @@ const CreateWorkout = () => {
     public: true,
     exercises: [],
   });
+
+  useEffect(() => {
+    const searchParams = new URLSearchParams(window.location.search);
+    const uuid = searchParams.get("uuid");
+
+    if (uuid) {
+      setWorkoutId(uuid);
+      api.getWorkout(uuid)
+        .then((data) => {
+          setWorkout(data);
+        })
+        .catch(() => {
+          toast.error("Failed to load workout for editing");
+        });
+    }
+  }, []);
 
   const updateWorkoutField = (field: keyof Workout, value: any) => {
     setWorkout((prev) => ({ ...prev, [field]: value }));
@@ -136,8 +153,14 @@ const CreateWorkout = () => {
         })),
       };
       
-      const response = await api.createWorkout(workoutData);
-      toast.success("Workout created successfully!");
+      let response;
+      if (workoutId) {
+        response = await api.updateWorkout(workoutId, workoutData);
+        toast.success("Workout updated successfully!");
+      } else {
+        response = await api.createWorkout(workoutData);
+        toast.success("Workout created successfully!");
+      }
       navigate(`/workouts/${response.uuid}`);
     } catch (error) {
       console.error("Error creating workout:", error);
@@ -170,7 +193,7 @@ const CreateWorkout = () => {
             disabled={isSubmitting}
           >
             <Save className="mr-2 h-4 w-4" />
-            {isSubmitting ? "Creating..." : "Create Workout"}
+            {isSubmitting ? (workoutId ? "Updating..." : "Creating...") : (workoutId ? "Update Workout" : "Create Workout")}
           </Button>
         </div>
       </div>
