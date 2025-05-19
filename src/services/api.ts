@@ -182,16 +182,7 @@ class ApiService {
   }
 
   async getWorkoutRecords() {
-    return this.request<{
-      results: WorkoutRecord[];
-      count: number;
-      next: string | null;
-      previous: string | null;
-    }>("/user/workouts/");
-  }
-
-  async getUserWorkoutRecords() {
-    return this.request<WorkoutRecord[]>("/user/workouts");
+    return this.request<WorkoutRecord[]>("/user/workouts/");
   }
 
   async getUserWorkoutRecord(uuid: string) {
