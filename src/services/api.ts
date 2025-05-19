@@ -266,12 +266,7 @@ class ApiService {
 
   // Chat endpoints
   async getChatSessions() {
-    return this.request<{
-      results: ChatSession[];
-      count: number;
-      next: string | null;
-      previous: string | null;
-    }>("/chat/sessions/");
+    return this.request<ChatSession[]>("/chat/sessions/");
   }
 
   async getChatSession(uuid: string) {
@@ -282,6 +277,12 @@ class ApiService {
     return this.request<ChatSession>("/chat/sessions/", {
       method: "POST",
       body: JSON.stringify({ title }),
+    });
+  }
+
+  async deleteChatSession(uuid: string) {
+    return this.request<void>(`/chat/sessions/${uuid}/`, {
+      method: "DELETE",
     });
   }
 }
