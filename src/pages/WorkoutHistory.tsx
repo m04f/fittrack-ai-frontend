@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import {
@@ -19,13 +18,7 @@ import {
 } from "@/components/ui/table";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Badge } from "@/components/ui/badge";
-import {
-  Calendar,
-  Clock,
-  ArrowRight,
-  Dumbbell,
-  History,
-} from "lucide-react";
+import { Calendar, Clock, ArrowRight, Dumbbell, History } from "lucide-react";
 import { formatDistance, format } from "date-fns";
 import api from "@/services/api";
 import { WorkoutRecord } from "@/types/api";
@@ -38,8 +31,8 @@ const WorkoutHistory = () => {
     const fetchWorkoutRecords = async () => {
       setLoading(true);
       try {
-        const data = await api.getWorkoutRecords();
-        setWorkoutRecords(data.results || []);
+        const records = await api.getWorkoutRecords();
+        setWorkoutRecords(records || []);
       } catch (error) {
         console.error("Error fetching workout records:", error);
       } finally {
@@ -53,10 +46,10 @@ const WorkoutHistory = () => {
   // Format duration from seconds to readable format
   const formatDuration = (seconds: number | undefined) => {
     if (!seconds) return "N/A";
-    
+
     const minutes = Math.floor(seconds / 60);
     const remainingSeconds = seconds % 60;
-    
+
     if (minutes === 0) {
       return `${remainingSeconds}s`;
     } else if (remainingSeconds === 0) {
@@ -81,9 +74,7 @@ const WorkoutHistory = () => {
             <History className="h-5 w-5" />
             Your Workout Records
           </CardTitle>
-          <CardDescription>
-            Track your progress over time
-          </CardDescription>
+          <CardDescription>Track your progress over time</CardDescription>
         </CardHeader>
         <CardContent>
           {loading ? (
@@ -109,7 +100,9 @@ const WorkoutHistory = () => {
               <TableBody>
                 {workoutRecords.map((record) => (
                   <TableRow key={record.uuid}>
-                    <TableCell className="font-medium">{record.workout_name}</TableCell>
+                    <TableCell className="font-medium">
+                      {record.workout_name}
+                    </TableCell>
                     <TableCell>
                       <div className="flex flex-col">
                         <span className="flex items-center gap-1">
@@ -117,9 +110,13 @@ const WorkoutHistory = () => {
                           {format(new Date(record.datetime), "MMM d, yyyy")}
                         </span>
                         <span className="text-xs text-muted-foreground">
-                          {formatDistance(new Date(record.datetime), new Date(), {
-                            addSuffix: true,
-                          })}
+                          {formatDistance(
+                            new Date(record.datetime),
+                            new Date(),
+                            {
+                              addSuffix: true,
+                            },
+                          )}
                         </span>
                       </div>
                     </TableCell>
@@ -130,7 +127,10 @@ const WorkoutHistory = () => {
                       </div>
                     </TableCell>
                     <TableCell>
-                      <Badge variant="outline" className="flex items-center gap-1 w-fit">
+                      <Badge
+                        variant="outline"
+                        className="flex items-center gap-1 w-fit"
+                      >
                         <Dumbbell className="h-3 w-3" />
                         {record.exercises.length}
                       </Badge>
@@ -154,10 +154,11 @@ const WorkoutHistory = () => {
               <p className="text-sm text-muted-foreground mt-1">
                 Start recording workouts to track your progress
               </p>
-              <Button className="mt-4 bg-fitness-600 hover:bg-fitness-700" asChild>
-                <Link to="/workouts">
-                  Find a Workout
-                </Link>
+              <Button
+                className="mt-4 bg-fitness-600 hover:bg-fitness-700"
+                asChild
+              >
+                <Link to="/workouts">Find a Workout</Link>
               </Button>
             </div>
           )}
