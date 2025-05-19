@@ -137,7 +137,7 @@ const WorkoutHistory = () => {
                     </TableCell>
                     <TableCell className="text-right">
                       <Button asChild size="sm" variant="outline">
-                        <Link to={`/workout-record/${record.uuid}`}>
+                        <Link to={`/history/${record.uuid}`}>
                           Details
                           <ArrowRight className="ml-1 h-4 w-4" />
                         </Link>
