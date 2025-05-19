@@ -1,7 +1,7 @@
-
 import { useEffect, useState } from "react";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
+import { ScrollArea } from "@/components/ui/scroll-area";
 import { useAuth } from "@/contexts/AuthContext";
 import { 
   Dumbbell, 
@@ -260,49 +260,51 @@ const Dashboard = () => {
                 ))}
               </div>
             ) : workoutRecords.length > 0 ? (
-              <div className="space-y-4">
-                {workoutRecords.slice(0, 3).map((record) => (
-                  <div key={record.uuid} className="flex flex-col gap-2 p-2 rounded-md hover:bg-muted">
-                    <div className="flex items-center gap-3">
-                      <div className="p-2 bg-secondary rounded-full">
-                        <Dumbbell className="h-5 w-5" />
+              <ScrollArea className="h-[300px] pr-4">
+                <div className="space-y-4">
+                  {workoutRecords.slice(0, 5).map((record) => (
+                    <div key={record.uuid} className="flex flex-col gap-2 p-2 rounded-md hover:bg-muted">
+                      <div className="flex items-center gap-3">
+                        <div className="p-2 bg-secondary rounded-full">
+                          <Dumbbell className="h-5 w-5" />
+                        </div>
+                        <div className="flex-1">
+                          <div className="font-medium">{record.workout_name}</div>
+                          <div className="text-sm text-muted-foreground">
+                            {new Date(record.datetime).toLocaleDateString()}
+                          </div>
+                        </div>
+                        <Button variant="ghost" size="icon" asChild>
+                          <Link to={`/workout-record/${record.uuid}`}>
+                            <ArrowRight className="h-4 w-4" />
+                          </Link>
+                        </Button>
                       </div>
-                      <div className="flex-1">
-                        <div className="font-medium">{record.workout_name}</div>
-                        <div className="text-sm text-muted-foreground">
-                          {new Date(record.datetime).toLocaleDateString()}
-                        </div>
+                      
+                      {/* Exercise list for this workout record */}
+                      <div className="ml-10 pl-2 border-l-2 border-secondary/50">
+                        {record.exercises.slice(0, 3).map((exercise, idx) => (
+                          <div key={exercise.uuid} className="text-sm py-1">
+                            <span className="font-medium">{exercise.exercise.split('/').pop()}</span>
+                            {" - "}
+                            <span className="text-muted-foreground">
+                              {exercise.reps && `${exercise.reps} reps`}
+                              {exercise.weight && exercise.reps && ` · `}
+                              {exercise.weight && `${exercise.weight} kg`}
+                              {exercise.duration && !exercise.reps && !exercise.weight && `${Math.floor(exercise.duration / 60)}m ${exercise.duration % 60}s`}
+                            </span>
+                          </div>
+                        ))}
+                        {record.exercises.length > 3 && (
+                          <div className="text-xs text-muted-foreground italic mt-1">
+                            +{record.exercises.length - 3} more exercises
+                          </div>
+                        )}
                       </div>
-                      <Button variant="ghost" size="icon" asChild>
-                        <Link to={`/workout-record/${record.uuid}`}>
-                          <ArrowRight className="h-4 w-4" />
-                        </Link>
-                      </Button>
                     </div>
-                    
-                    {/* Exercise list for this workout record */}
-                    <div className="ml-10 pl-2 border-l-2 border-secondary/50">
-                      {record.exercises.slice(0, 3).map((exercise, idx) => (
-                        <div key={exercise.uuid} className="text-sm py-1">
-                          <span className="font-medium">{exercise.exercise.split('/').pop()}</span>
-                          {" - "}
-                          <span className="text-muted-foreground">
-                            {exercise.reps && `${exercise.reps} reps`}
-                            {exercise.weight && exercise.reps && ` · `}
-                            {exercise.weight && `${exercise.weight} kg`}
-                            {exercise.duration && !exercise.reps && !exercise.weight && `${Math.floor(exercise.duration / 60)}m ${exercise.duration % 60}s`}
-                          </span>
-                        </div>
-                      ))}
-                      {record.exercises.length > 3 && (
-                        <div className="text-xs text-muted-foreground italic mt-1">
-                          +{record.exercises.length - 3} more exercises
-                        </div>
-                      )}
-                    </div>
-                  </div>
-                ))}
-              </div>
+                  ))}
+                </div>
+              </ScrollArea>
             ) : (
               <div className="text-center py-6">
                 <p className="text-muted-foreground">No workout records yet</p>
