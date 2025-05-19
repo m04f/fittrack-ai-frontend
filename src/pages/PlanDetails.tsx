@@ -172,13 +172,13 @@ const PlanDetails = () => {
     const today = new Date();
 
     if (hasRecord) {
-      return "bg-green-50 hover:bg-green-100 border-green-200";
+      return "bg-green-50 hover:bg-green-100 border-green-200 dark:bg-green-900 dark:hover:bg-green-800 dark:border-green-700";
     } else if (isToday(workoutDate)) {
-      return "bg-blue-50 hover:bg-blue-100 border-blue-200";
+      return "bg-blue-50 hover:bg-blue-100 border-blue-200 dark:bg-blue-900 dark:hover:bg-blue-800 dark:border-blue-700";
     } else if (isBefore(workoutDate, today)) {
-      return "bg-amber-50 hover:bg-amber-100 border-amber-200";
+      return "bg-amber-50 hover:bg-amber-100 border-amber-200 dark:bg-amber-900 dark:hover:bg-amber-800 dark:border-amber-700";
     } else {
-      return "bg-gray-50 hover:bg-gray-100 border-gray-200";
+      return "bg-gray-50 hover:bg-gray-100 border-gray-200 dark:bg-gray-900 dark:hover:bg-gray-800 dark:border-gray-700";
     }
   };
 
@@ -376,19 +376,19 @@ const PlanDetails = () => {
           </div>
 
           <div className="grid grid-cols-2 gap-2 mt-6">
-            <div className="flex items-center p-2 rounded-md bg-gray-50">
+            <div className="flex items-center p-2 rounded-md bg-gray-50 dark:bg-gray-900">
               <ArrowRight className="h-4 w-4 mr-2 text-gray-600" />
               <span className="text-sm">Upcoming workout</span>
             </div>
-            <div className="flex items-center p-2 rounded-md bg-blue-50">
+            <div className="flex items-center p-2 rounded-md bg-blue-50 dark:bg-blue-900">
               <Clock className="h-4 w-4 mr-2 text-blue-600" />
               <span className="text-sm">Today's workout</span>
             </div>
-            <div className="flex items-center p-2 rounded-md bg-amber-50">
+            <div className="flex items-center p-2 rounded-md bg-amber-50 dark:bg-amber-900">
               <Clock className="h-4 w-4 mr-2 text-amber-600" />
               <span className="text-sm">Missed workout</span>
             </div>
-            <div className="flex items-center p-2 rounded-md bg-green-50">
+            <div className="flex items-center p-2 rounded-md bg-green-50 dark:bg-green-900">
               <CheckCircle2 className="h-4 w-4 mr-2 text-green-600" />
               <span className="text-sm">Completed workout</span>
             </div>

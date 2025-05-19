@@ -4,65 +4,78 @@ import { useAuth } from "./AuthContext";
 import api from "@/services/api";
 
 type ThemeContextType = {
-  isDarkMode: boolean;
-  toggleDarkMode: () => void;
+  theme: "system" | "light" | "dark";
+  setTheme: (theme: "system" | "light" | "dark") => void;
 };
 
 const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const { user, updateUserInfo } = useAuth();
-  const [isDarkMode, setIsDarkMode] = useState<boolean>(
-    user?.frontend_settings?.displaySettings?.darkMode || false
+  const [theme, setTheme] = useState<"system" | "light" | "dark">(
+    user?.frontend_settings?.displaySettings?.theme || "system"
   );
 
   // Apply theme on initial load
   useEffect(() => {
-    if (isDarkMode) {
+    if (theme === "dark") {
       document.documentElement.classList.add("dark");
-    } else {
+    } else if (theme === "light") {
       document.documentElement.classList.remove("dark");
+    } else {
+      const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+      if (prefersDark) {
+        document.documentElement.classList.add("dark");
+      } else {
+        document.documentElement.classList.remove("dark");
+      }
     }
-  }, []);
+  }, [theme]);
 
   useEffect(() => {
     // Update the dark mode setting when the user's settings change
     if (user?.frontend_settings?.displaySettings) {
-      setIsDarkMode(user.frontend_settings.displaySettings.darkMode);
+      setTheme(user.frontend_settings.displaySettings.theme || "system");
     }
   }, [user?.frontend_settings?.displaySettings]);
 
   useEffect(() => {
     // Apply dark mode class to document
-    if (isDarkMode) {
+    if (theme === "dark") {
       document.documentElement.classList.add("dark");
-    } else {
+    } else if (theme === "light") {
       document.documentElement.classList.remove("dark");
+    } else {
+      const prefersDark = window.matchMedia("(prefers-color-scheme: dark)").matches;
+      if (prefersDark) {
+        document.documentElement.classList.add("dark");
+      } else {
+        document.documentElement.classList.remove("dark");
+      }
     }
-  }, [isDarkMode]);
+  }, [theme]);
 
-  const toggleDarkMode = async () => {
-    const newDarkModeValue = !isDarkMode;
-    setIsDarkMode(newDarkModeValue);
-    
+  const setThemePreference = async (newTheme: "system" | "light" | "dark") => {
+    setTheme(newTheme);
+
     // Update the user's settings if they're logged in
     if (user) {
       const currentSettings = user.frontend_settings || {};
       const displaySettings = currentSettings.displaySettings || {};
-      
+
       const updatedSettings = {
         ...currentSettings,
         displaySettings: {
           ...displaySettings,
-          darkMode: newDarkModeValue,
+          theme: newTheme,
         },
       };
-      
+
       try {
         await api.updateUserInfo({
           frontend_settings: updatedSettings,
         });
-        
+
         // Update local user state with the new settings
         updateUserInfo({
           ...user,
@@ -75,8 +88,8 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
   };
 
   const value = {
-    isDarkMode,
-    toggleDarkMode,
+    theme,
+    setTheme: setThemePreference,
   };
 
   return <ThemeContext.Provider value={value}>{children}</ThemeContext.Provider>;

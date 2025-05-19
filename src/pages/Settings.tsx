@@ -19,7 +19,7 @@ import { toast } from "sonner";
 
 const SettingsPage = () => {
   const { logout, user, updateUserInfo } = useAuth();
-  const { isDarkMode, toggleDarkMode } = useTheme();
+  const { theme, setTheme } = useTheme();
   const [isLoading, setIsLoading] = useState(false);
 
   const [notificationSettings, setNotificationSettings] = useState(
@@ -33,8 +33,7 @@ const SettingsPage = () => {
 
   const [displaySettings, setDisplaySettings] = useState(
     user?.frontend_settings?.displaySettings || {
-      darkMode: isDarkMode,
-      compactView: false,
+      theme,
       showMetricUnits: true,
     },
   );
@@ -48,14 +47,12 @@ const SettingsPage = () => {
     }));
   };
 
-  const handleDisplayChange = (setting: keyof typeof displaySettings) => {
-    if (setting === "darkMode") {
-      toggleDarkMode();
-    } else {
-      setDisplaySettings((prev) => ({
-        ...prev,
-        [setting]: !prev[setting],
-      }));
+  const handleDisplayChange = (
+    setting: keyof typeof displaySettings,
+    value: "system" | "light" | "dark",
+  ) => {
+    if (setting === "theme") {
+      setTheme(value);
     }
   };
 
@@ -63,10 +60,7 @@ const SettingsPage = () => {
     setIsLoading(true);
     const updatedSettings = {
       notificationSettings,
-      displaySettings: {
-        ...displaySettings,
-        darkMode: isDarkMode,
-      },
+      displaySettings,
     };
 
     api
@@ -119,32 +113,26 @@ const SettingsPage = () => {
             <CardContent className="space-y-4">
               <div className="flex items-center justify-between">
                 <div className="space-y-0.5">
-                  <Label htmlFor="dark-mode">Dark Mode</Label>
+                  <Label htmlFor="theme">Theme</Label>
                   <p className="text-muted-foreground text-sm">
-                    Enable dark mode for the application
+                    Choose between system, light, or dark theme
                   </p>
                 </div>
-                <Switch
-                  id="dark-mode"
-                  checked={isDarkMode}
-                  onCheckedChange={() => handleDisplayChange("darkMode")}
-                />
-              </div>
-
-              <Separator />
-
-              <div className="flex items-center justify-between">
-                <div className="space-y-0.5">
-                  <Label htmlFor="compact-view">Compact View</Label>
-                  <p className="text-muted-foreground text-sm">
-                    Show more content with less spacing
-                  </p>
-                </div>
-                <Switch
-                  id="compact-view"
-                  checked={displaySettings.compactView}
-                  onCheckedChange={() => handleDisplayChange("compactView")}
-                />
+                <select
+                  id="theme"
+                  value={theme}
+                  onChange={(e) =>
+                    handleDisplayChange(
+                      "theme",
+                      e.target.value as "system" | "light" | "dark",
+                    )
+                  }
+                  className="border rounded px-2 py-1 bg-background text-foreground"
+                >
+                  <option value="system">System</option>
+                  <option value="light">Light</option>
+                  <option value="dark">Dark</option>
+                </select>
               </div>
 
               <Separator />
@@ -168,7 +156,7 @@ const SettingsPage = () => {
           <div className="flex justify-end">
             <Button
               className="bg-fitness-600 hover:bg-fitness-700"
-              onClick={handleSaveSettings}
+              onClick={() => handleSaveSettings()}
               disabled={isLoading}
             >
               {isLoading ? "Saving..." : "Save Settings"}
@@ -258,16 +246,6 @@ const SettingsPage = () => {
               </div>
             </CardContent>
           </Card>
-
-          <div className="flex justify-end">
-            <Button
-              className="bg-fitness-600 hover:bg-fitness-700"
-              onClick={handleSaveSettings}
-              disabled={isLoading}
-            >
-              {isLoading ? "Saving..." : "Save Settings"}
-            </Button>
-          </div>
         </TabsContent>
 
         <TabsContent value="account" className="space-y-4 pt-4">
