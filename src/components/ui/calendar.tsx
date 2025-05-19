@@ -14,7 +14,7 @@ function Calendar({
   showOutsideDays = true,
   ...props
 }: CalendarProps) {
-  const { isDarkMode } = useTheme();
+  const { theme } = useTheme();
 
   return (
     <DayPicker
