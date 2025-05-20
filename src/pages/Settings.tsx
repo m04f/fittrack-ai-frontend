@@ -152,16 +152,6 @@ const SettingsPage = () => {
               </div>
             </CardContent>
           </Card>
-
-          <div className="flex justify-end">
-            <Button
-              className="bg-fitness-600 hover:bg-fitness-700"
-              onClick={() => handleSaveSettings()}
-              disabled={isLoading}
-            >
-              {isLoading ? "Saving..." : "Save Settings"}
-            </Button>
-          </div>
         </TabsContent>
 
         <TabsContent value="notifications" className="space-y-4 pt-4">
