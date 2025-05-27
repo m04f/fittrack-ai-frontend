@@ -12,6 +12,7 @@ import api from "@/services/api";
 import { MessageCircle, Plus, Send, User, Bot, Trash } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
+import ReactMarkdown from "react-markdown";
 
 const ChatPage = () => {
   const [chatSessions, setChatSessions] = useState([]);
@@ -204,7 +205,9 @@ const ChatPage = () => {
           <div
             className={`px-4 py-2 rounded-lg ${isUser ? "bg-fitness-500 text-white" : "bg-muted"}`}
           >
-            <div className="text-sm">{msg.content}</div>
+            <div className="text-sm">
+              <ReactMarkdown>{msg.content}</ReactMarkdown>
+            </div>
             <div className="text-xs opacity-70 mt-1 text-right">
               {formatTimestamp(msg.timestamp)}
             </div>
