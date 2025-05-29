@@ -17,7 +17,7 @@ import {
 
 // API Configuration
 // Use the proxy in development, direct URL in production
-const API_BASE_URL = import.meta.env.DEV ? "/api" : "http://localhost:8000/api";
+const API_BASE_URL = "/api";
 
 // API Service for making authenticated requests to the Django backend
 class ApiService {

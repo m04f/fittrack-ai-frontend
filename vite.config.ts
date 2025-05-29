@@ -11,7 +11,7 @@ export default defineConfig(({ mode }) => ({
     port: 8080,
     proxy: {
       '/api': {
-        target: 'http://localhost:8000',
+        target: 'https://django-hello-world-nine-beige.vercel.app',
         changeOrigin: true,
         // Makes the origin of the request match the target's origin
         secure: false,
