@@ -95,6 +95,7 @@ class ApiService {
 
   // Auth endpoints
   async login(username: string, password: string) {
+    this.clearToken(); // Clear any existing token before login
     const data = await this.request<AuthResponse>("/auth/token/login/", {
       method: "POST",
       body: JSON.stringify({ username, password }),
@@ -104,6 +105,7 @@ class ApiService {
   }
 
   async register(username: string, email: string, password: string) {
+    this.clearToken(); // Clear any existing token before registration
     return this.request<{ id: number }>("/auth/users/", {
       method: "POST",
       body: JSON.stringify({ username, email, password }),
@@ -111,10 +113,16 @@ class ApiService {
   }
 
   async logout() {
-    await this.request<void>("/auth/token/logout/", {
-      method: "POST",
-    });
+    // Clear token before making the logout request
     this.clearToken();
+    try {
+      await this.request<void>("/auth/token/logout/", {
+        method: "POST",
+      });
+    } catch (error) {
+      // Even if the server request fails, we've already cleared the local token
+      console.error("Logout request failed, but local token was cleared:", error);
+    }
   }
 
   async getUserInfo(): Promise<UserInfo> {
