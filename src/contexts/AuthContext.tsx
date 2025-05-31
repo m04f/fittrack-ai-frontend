@@ -8,6 +8,7 @@ interface AuthContextType {
   user: UserInfo | null;
   isAuthenticated: boolean;
   isLoading: boolean;
+  hasCompleteProfile: boolean;
   login: (username: string, password: string) => Promise<void>;
   register: (username: string, email: string, password: string) => Promise<void>;
   logout: () => void;
@@ -20,6 +21,18 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
   const [user, setUser] = useState<UserInfo | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const navigate = useNavigate();
+
+  const hasCompleteProfile = (user: UserInfo | null): boolean => {
+    if (!user) return false;
+    return !!(
+      user.age &&
+      user.height &&
+      user.weight &&
+      user.gender &&
+      user.fitness_level &&
+      user.fitness_goal
+    );
+  };
 
   useEffect(() => {
     const checkAuthStatus = async () => {
@@ -51,10 +64,12 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       setUser(userData as UserInfo);
       toast.success("Login successful!");
       
-      // Add a small delay before navigation to ensure state is updated
-      setTimeout(() => {
+      // Redirect based on profile completion
+      if (!hasCompleteProfile(userData)) {
+        navigate("/profile");
+      } else {
         navigate("/dashboard");
-      }, 100);
+      }
     } catch (error) {
       console.error("Login error:", error);
       throw error;
@@ -67,8 +82,10 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     setIsLoading(true);
     try {
       await api.register(username, email, password);
-      toast.success("Registration successful! Please log in.");
-      navigate("/login");
+      // Automatically login after successful registration
+      await login(username, password);
+      toast.success("Registration successful!");
+      navigate("/profile");
     } catch (error) {
       console.error("Registration error:", error);
       throw error;
@@ -103,6 +120,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         user,
         isAuthenticated: !!user,
         isLoading,
+        hasCompleteProfile: hasCompleteProfile(user),
         login,
         register,
         logout,
