@@ -13,8 +13,12 @@ import { MessageCircle, Plus, Send, User, Bot, Trash } from "lucide-react";
 import { toast } from "sonner";
 import { format } from "date-fns";
 import ReactMarkdown from "react-markdown";
+import { useAuth } from "@/contexts/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 const ChatPage = () => {
+  const { user, hasCompleteProfile } = useAuth();
+  const navigate = useNavigate();
   const [chatSessions, setChatSessions] = useState([]);
   const [currentSession, setCurrentSession] = useState(null);
   const [message, setMessage] = useState("");
@@ -23,8 +27,14 @@ const ChatPage = () => {
   const chatEndRef = useRef(null);
   const wsRef = useRef(null);
 
-  // Fetch chat sessions on mount
   useEffect(() => {
+    // Check if user has completed their profile
+    if (!hasCompleteProfile) {
+      toast.error("Please complete your profile to use the chat feature");
+      navigate("/profile");
+      return;
+    }
+
     const fetchChatSessions = async () => {
       setLoading(true);
       try {
@@ -40,8 +50,9 @@ const ChatPage = () => {
         setLoading(false);
       }
     };
+
     fetchChatSessions();
-  }, []);
+  }, [hasCompleteProfile, navigate]);
 
   // Auto scroll to bottom on new messages
   useEffect(() => {

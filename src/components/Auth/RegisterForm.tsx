@@ -1,4 +1,3 @@
-
 import { useState } from "react";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -40,6 +39,7 @@ const RegisterForm = () => {
     setIsSubmitting(true);
     try {
       await register(username, email, password);
+      // No need for navigation here as it's handled in the AuthContext
     } catch (error) {
       console.error("Registration failed:", error);
     } finally {
