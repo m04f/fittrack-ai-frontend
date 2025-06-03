@@ -158,6 +158,12 @@ export interface Message {
   timestamp: string;
 }
 
+export interface WebSocketMessage {
+  message: string;
+  role: "user" | "assistant";
+  timestamp?: string;
+}
+
 export interface ChatSession {
   uuid: string;
   title: string;
@@ -167,4 +173,9 @@ export interface ChatSession {
 
 export interface DetailedChatSession extends ChatSession {
   messages: Message[];
+}
+
+export interface WebSocketEvent {
+  type: "message" | "error" | "close";
+  payload?: WebSocketMessage | string;
 }

@@ -22,10 +22,63 @@ const API_BASE_URL = "/api";
 // API Service for making authenticated requests to the Django backend
 class ApiService {
   private token: string | null = null;
+  private ws: WebSocket | null = null;
 
   constructor() {
     // Check if token exists in localStorage
     this.token = localStorage.getItem("fitness_token");
+  }
+
+  connectWebSocket(
+    sessionId: string,
+    onMessage: (data: any) => void,
+    onError?: (error: Event) => void,
+    onClose?: () => void,
+  ) {
+    if (this.ws) {
+      this.ws.close();
+    }
+    this.ws = new WebSocket(
+      `wss://fittrack-api-9b5n.onrender.com/ws/chat/sessions/${sessionId}/`,
+    );
+
+    this.ws.onopen = () => {
+      console.log("WebSocket connected");
+    };
+
+    this.ws.onmessage = (event) => {
+      try {
+        const data = JSON.parse(event.data);
+        onMessage(data);
+      } catch (err) {
+        console.error("Error parsing WebSocket message:", err);
+      }
+    };
+
+    this.ws.onerror = (error) => {
+      console.error("WebSocket error:", error);
+      if (onError) onError(error);
+    };
+
+    this.ws.onclose = () => {
+      console.log("WebSocket disconnected");
+      if (onClose) onClose();
+    };
+  }
+
+  sendWebSocketMessage(message: string) {
+    if (this.ws && this.ws.readyState === WebSocket.OPEN) {
+      this.ws.send(JSON.stringify({ message }));
+    } else {
+      console.error("WebSocket is not open");
+    }
+  }
+
+  closeWebSocket() {
+    if (this.ws) {
+      this.ws.close();
+      this.ws = null;
+    }
   }
 
   setToken(token: string) {
