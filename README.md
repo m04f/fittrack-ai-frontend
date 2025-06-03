@@ -1,4 +1,8 @@
-# Welcome to your Lovable project
+# FitTrack AI Frontend
+
+[![Deploy to GitHub Pages](https://github.com/YOUR-USERNAME/fittrack-ai-frontend/actions/workflows/deploy.yml/badge.svg)](https://github.com/YOUR-USERNAME/fittrack-ai-frontend/actions/workflows/deploy.yml)
+
+Your intelligent fitness companion built with React and AI-powered coaching.
 
 ## Project info
 
@@ -62,7 +66,20 @@ This project is built with:
 
 ## How can I deploy this project?
 
-Simply open [Lovable](https://lovable.dev/projects/0e63b0c3-ea80-46fc-8628-0ad8473779e5) and click on Share -> Publish.
+### Option 1: GitHub Pages (Recommended)
+
+This project includes automatic deployment to GitHub Pages via GitHub Actions:
+
+1. Fork or clone this repository
+2. Enable GitHub Pages in your repository settings (Settings → Pages → Source: GitHub Actions)
+3. Push changes to the `main` branch
+4. The site will be automatically deployed to `https://YOUR-USERNAME.github.io/fittrack-ai-frontend/`
+
+See [DEPLOYMENT.md](./DEPLOYMENT.md) for detailed setup instructions.
+
+### Option 2: Lovable
+
+Simply open [Lovable](https://lovable.dev/projects/0e63b0c3-ea80-46fc-8628-0ad8473779e5) and click on Share → Publish.
 
 ## Can I connect a custom domain to my Lovable project?
 

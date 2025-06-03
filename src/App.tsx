@@ -30,7 +30,7 @@ const queryClient = new QueryClient();
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
-      <BrowserRouter>
+      <BrowserRouter basename={process.env.NODE_ENV === 'production' ? '/fittrack-ai-frontend' : ''}>
         <AuthProvider>
           <ThemeProvider>
             <Toaster />
