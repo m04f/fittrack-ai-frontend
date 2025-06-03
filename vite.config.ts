@@ -1,4 +1,3 @@
-
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import path from "path";
@@ -10,31 +9,29 @@ export default defineConfig(({ mode }) => ({
     host: "::",
     port: 8080,
     proxy: {
-      '/api': {
-        target: 'https://django-hello-world-nine-beige.vercel.app',
+      "/api": {
+        target: "https://fittrack-api-9b5n.onrender.com/",
         changeOrigin: true,
         // Makes the origin of the request match the target's origin
         secure: false,
         // This is important to handle preflight requests properly
         configure: (proxy) => {
-          proxy.on('error', (err) => {
-            console.log('proxy error', err);
+          proxy.on("error", (err) => {
+            console.log("proxy error", err);
           });
-          proxy.on('proxyReq', (proxyReq, req) => {
-            console.log('Sending Request:', req.method, req.url);
+          proxy.on("proxyReq", (proxyReq, req) => {
+            console.log("Sending Request:", req.method, req.url);
           });
-          proxy.on('proxyRes', (proxyRes, req) => {
-            console.log('Received Response:', proxyRes.statusCode, req.url);
+          proxy.on("proxyRes", (proxyRes, req) => {
+            console.log("Received Response:", proxyRes.statusCode, req.url);
           });
-        }
-      }
+        },
+      },
     },
   },
-  plugins: [
-    react(),
-    mode === 'development' &&
-    componentTagger(),
-  ].filter(Boolean),
+  plugins: [react(), mode === "development" && componentTagger()].filter(
+    Boolean,
+  ),
   resolve: {
     alias: {
       "@": path.resolve(__dirname, "./src"),
