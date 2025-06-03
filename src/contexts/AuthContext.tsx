@@ -1,4 +1,10 @@
-import { createContext, useContext, useEffect, useState, ReactNode } from "react";
+import {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  ReactNode,
+} from "react";
 import api from "@/services/api";
 import { useNavigate } from "react-router-dom";
 import { toast } from "sonner";
@@ -9,7 +15,11 @@ interface AuthContextType {
   isAuthenticated: boolean;
   isLoading: boolean;
   login: (username: string, password: string) => Promise<void>;
-  register: (username: string, email: string, password: string) => Promise<void>;
+  register: (
+    username: string,
+    email: string,
+    password: string,
+  ) => Promise<void>;
   logout: () => void;
   updateUserInfo: (data: Partial<UserInfo>) => Promise<void>;
 }
@@ -50,7 +60,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
       console.log("User data received after login:", userData);
       setUser(userData as UserInfo);
       toast.success("Login successful!");
-      
+
       // Add a small delay before navigation to ensure state is updated
       setTimeout(() => {
         navigate("/dashboard");
@@ -63,12 +73,39 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
-  const register = async (username: string, email: string, password: string) => {
+  const register = async (
+    username: string,
+    email: string,
+    password: string,
+  ) => {
     setIsLoading(true);
     try {
       await api.register(username, email, password);
-      toast.success("Registration successful! Please log in.");
-      navigate("/login");
+      console.log("Registration successful, attempting auto-login...");
+
+      try {
+        // Auto-login the user after successful registration
+        await api.login(username, password);
+        console.log("Auto-login successful, fetching user info...");
+        const userData = await api.getUserInfo();
+        console.log("User data received after auto-login:", userData);
+        setUser(userData as UserInfo);
+
+        toast.success("Registration successful! Welcome to FitTrack AI!");
+        await api.enrollInPlan("29da674c-f915-426a-af4c-c55846ef1b18");
+
+        // Add a small delay before navigation to ensure state is updated
+        setTimeout(() => {
+          navigate("/dashboard");
+        }, 100);
+      } catch (loginError) {
+        console.error("Auto-login failed after registration:", loginError);
+        // Fallback to manual login if auto-login fails
+        toast.success(
+          "Registration successful! Please log in with your new account.",
+        );
+        navigate("/login");
+      }
     } catch (error) {
       console.error("Registration error:", error);
       throw error;

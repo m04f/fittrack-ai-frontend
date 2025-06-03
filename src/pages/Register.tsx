@@ -3,41 +3,71 @@ import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import { Button } from "@/components/ui/button";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
+import {
+  Form,
+  FormControl,
+  FormField,
+  FormItem,
+  FormLabel,
+  FormMessage,
+} from "@/components/ui/form";
 import { Checkbox } from "@/components/ui/checkbox";
 import { useAuth } from "@/contexts/AuthContext";
 import { Link } from "react-router-dom";
-import { Dumbbell, Eye, EyeOff, Mail, Lock, User, CheckCircle } from "lucide-react";
+import {
+  Dumbbell,
+  Eye,
+  EyeOff,
+  Mail,
+  Lock,
+  User,
+  CheckCircle,
+} from "lucide-react";
 import { toast } from "sonner";
 import { useState } from "react";
 
-const registerSchema = z.object({
-  username: z
-    .string()
-    .min(3, "Username must be at least 3 characters")
-    .max(20, "Username must be less than 20 characters")
-    .regex(/^[a-zA-Z0-9_]+$/, "Username can only contain letters, numbers, and underscores"),
-  email: z
-    .string()
-    .email("Please enter a valid email address")
-    .min(1, "Email is required"),
-  password: z
-    .string()
-    .min(8, "Password must be at least 8 characters")
-    .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
-    .regex(/[a-z]/, "Password must contain at least one lowercase letter")
-    .regex(/[0-9]/, "Password must contain at least one number")
-    .regex(/[^A-Za-z0-9]/, "Password must contain at least one special character"),
-  confirmPassword: z.string().min(1, "Please confirm your password"),
-  agreeToTerms: z.boolean().refine(val => val === true, {
-    message: "You must agree to the terms and conditions",
-  }),
-}).refine((data) => data.password === data.confirmPassword, {
-  message: "Passwords don't match",
-  path: ["confirmPassword"],
-});
+const registerSchema = z
+  .object({
+    username: z
+      .string()
+      .min(3, "Username must be at least 3 characters")
+      .max(20, "Username must be less than 20 characters")
+      .regex(
+        /^[a-zA-Z0-9_]+$/,
+        "Username can only contain letters, numbers, and underscores",
+      ),
+    email: z
+      .string()
+      .email("Please enter a valid email address")
+      .min(1, "Email is required"),
+    password: z
+      .string()
+      .min(8, "Password must be at least 8 characters")
+      .regex(/[A-Z]/, "Password must contain at least one uppercase letter")
+      .regex(/[a-z]/, "Password must contain at least one lowercase letter")
+      .regex(/[0-9]/, "Password must contain at least one number")
+      .regex(
+        /[^A-Za-z0-9]/,
+        "Password must contain at least one special character",
+      ),
+    confirmPassword: z.string().min(1, "Please confirm your password"),
+    agreeToTerms: z.boolean().refine((val) => val === true, {
+      message: "You must agree to the terms and conditions",
+    }),
+  })
+  .refine((data) => data.password === data.confirmPassword, {
+    message: "Passwords don't match",
+    path: ["confirmPassword"],
+  });
 
 type RegisterFormValues = z.infer<typeof registerSchema>;
 
@@ -86,7 +116,6 @@ const Register = () => {
   const onSubmit = async (values: RegisterFormValues) => {
     try {
       await register(values.username, values.email, values.password);
-      toast.success("Account created successfully! Welcome to FitTrack AI!");
     } catch (error) {
       toast.error("Registration failed. Please try again.");
       console.error("Registration failed:", error);
@@ -113,13 +142,18 @@ const Register = () => {
 
           <CardContent className="pb-6">
             <Form {...form}>
-              <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-5">
+              <form
+                onSubmit={form.handleSubmit(onSubmit)}
+                className="space-y-5"
+              >
                 <FormField
                   control={form.control}
                   name="username"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-sm font-medium">Username</FormLabel>
+                      <FormLabel className="text-sm font-medium">
+                        Username
+                      </FormLabel>
                       <FormControl>
                         <div className="relative">
                           <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
@@ -140,7 +174,9 @@ const Register = () => {
                   name="email"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-sm font-medium">Email Address</FormLabel>
+                      <FormLabel className="text-sm font-medium">
+                        Email Address
+                      </FormLabel>
                       <FormControl>
                         <div className="relative">
                           <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
@@ -162,7 +198,9 @@ const Register = () => {
                   name="password"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-sm font-medium">Password</FormLabel>
+                      <FormLabel className="text-sm font-medium">
+                        Password
+                      </FormLabel>
                       <FormControl>
                         <div className="relative">
                           <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
@@ -191,7 +229,9 @@ const Register = () => {
                             <div className="flex-1 h-2 bg-gray-200 rounded-full overflow-hidden">
                               <div
                                 className={`h-full transition-all duration-300 ${getStrengthColor(passwordStrength)}`}
-                                style={{ width: `${(passwordStrength / 5) * 100}%` }}
+                                style={{
+                                  width: `${(passwordStrength / 5) * 100}%`,
+                                }}
                               />
                             </div>
                             <span className="text-xs font-medium text-muted-foreground">
@@ -199,19 +239,27 @@ const Register = () => {
                             </span>
                           </div>
                           <div className="text-xs text-muted-foreground space-y-1">
-                            <div className={`flex items-center gap-1 ${watchPassword.length >= 8 ? 'text-green-600' : ''}`}>
+                            <div
+                              className={`flex items-center gap-1 ${watchPassword.length >= 8 ? "text-green-600" : ""}`}
+                            >
                               <CheckCircle className="h-3 w-3" />
                               At least 8 characters
                             </div>
-                            <div className={`flex items-center gap-1 ${/[A-Z]/.test(watchPassword) ? 'text-green-600' : ''}`}>
+                            <div
+                              className={`flex items-center gap-1 ${/[A-Z]/.test(watchPassword) ? "text-green-600" : ""}`}
+                            >
                               <CheckCircle className="h-3 w-3" />
                               One uppercase letter
                             </div>
-                            <div className={`flex items-center gap-1 ${/[0-9]/.test(watchPassword) ? 'text-green-600' : ''}`}>
+                            <div
+                              className={`flex items-center gap-1 ${/[0-9]/.test(watchPassword) ? "text-green-600" : ""}`}
+                            >
                               <CheckCircle className="h-3 w-3" />
                               One number
                             </div>
-                            <div className={`flex items-center gap-1 ${/[^A-Za-z0-9]/.test(watchPassword) ? 'text-green-600' : ''}`}>
+                            <div
+                              className={`flex items-center gap-1 ${/[^A-Za-z0-9]/.test(watchPassword) ? "text-green-600" : ""}`}
+                            >
                               <CheckCircle className="h-3 w-3" />
                               One special character
                             </div>
@@ -228,7 +276,9 @@ const Register = () => {
                   name="confirmPassword"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel className="text-sm font-medium">Confirm Password</FormLabel>
+                      <FormLabel className="text-sm font-medium">
+                        Confirm Password
+                      </FormLabel>
                       <FormControl>
                         <div className="relative">
                           <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
@@ -240,7 +290,9 @@ const Register = () => {
                           />
                           <button
                             type="button"
-                            onClick={() => setShowConfirmPassword(!showConfirmPassword)}
+                            onClick={() =>
+                              setShowConfirmPassword(!showConfirmPassword)
+                            }
                             className="absolute right-3 top-3 text-muted-foreground hover:text-foreground transition-colors"
                           >
                             {showConfirmPassword ? (
@@ -271,11 +323,17 @@ const Register = () => {
                       <div className="space-y-1 leading-none">
                         <FormLabel className="text-sm">
                           I agree to the{" "}
-                          <Link to="/terms" className="text-fitness-600 hover:text-fitness-700 underline">
+                          <Link
+                            to="/terms"
+                            className="text-fitness-600 hover:text-fitness-700 underline"
+                          >
                             Terms of Service
                           </Link>{" "}
                           and{" "}
-                          <Link to="/privacy" className="text-fitness-600 hover:text-fitness-700 underline">
+                          <Link
+                            to="/privacy"
+                            className="text-fitness-600 hover:text-fitness-700 underline"
+                          >
                             Privacy Policy
                           </Link>
                         </FormLabel>
@@ -307,8 +365,8 @@ const Register = () => {
             <div className="w-full text-center">
               <div className="text-sm text-muted-foreground">
                 Already have an account?{" "}
-                <Link 
-                  to="/login" 
+                <Link
+                  to="/login"
                   className="font-semibold text-fitness-600 hover:text-fitness-700 transition-colors duration-200"
                 >
                   Sign in instead
