@@ -13,7 +13,7 @@ const ThemeContext = createContext<ThemeContextType | undefined>(undefined);
 export function ThemeProvider({ children }: { children: React.ReactNode }) {
   const { user, updateUserInfo } = useAuth();
   const [theme, setTheme] = useState<"system" | "light" | "dark">(
-    user?.frontend_settings?.displaySettings?.theme || "system"
+    user?.frontend_settings?.displaySettings?.theme || localStorage.getItem("theme") || "system"
   );
 
   // Apply theme on initial load
@@ -36,6 +36,11 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
     // Update the dark mode setting when the user's settings change
     if (user?.frontend_settings?.displaySettings) {
       setTheme(user.frontend_settings.displaySettings.theme || "system");
+    } else {
+      const storedTheme = localStorage.getItem("theme");
+      if (storedTheme) {
+        setTheme(storedTheme as "system" | "light" | "dark");
+      }
     }
   }, [user?.frontend_settings?.displaySettings]);
 
@@ -57,6 +62,9 @@ export function ThemeProvider({ children }: { children: React.ReactNode }) {
 
   const setThemePreference = async (newTheme: "system" | "light" | "dark") => {
     setTheme(newTheme);
+    if (!user) {
+      localStorage.setItem("theme", newTheme);
+    }
 
     // Update the user's settings if they're logged in
     if (user) {
