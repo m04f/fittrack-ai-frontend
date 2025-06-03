@@ -222,8 +222,8 @@ const Chat = () => {
     <div className="container mx-auto p-6 max-w-7xl">
       <div className="flex flex-col lg:flex-row gap-6 h-[calc(100vh-8rem)]">
         {/* Sessions Sidebar */}
-        <Card className="w-full lg:w-80 flex flex-col">
-          <CardHeader className="pb-3">
+        <Card className="w-full lg:w-80 flex flex-col h-full">
+          <CardHeader className="pb-3 flex-shrink-0">
             <div className="flex items-center justify-between">
               <CardTitle className="flex items-center gap-2">
                 <MessageCircle className="h-5 w-5" />
@@ -238,7 +238,7 @@ const Chat = () => {
               </Button>
             </div>
           </CardHeader>
-          <CardContent className="flex-1 p-0">
+          <CardContent className="flex-1 p-0 overflow-hidden">
             <ScrollArea className="h-full px-4 pb-4">
               {loadingSessions ? (
                 <div className="space-y-3">
@@ -297,7 +297,7 @@ const Chat = () => {
         </Card>
 
         {/* Chat Area */}
-        <Card className="flex-1 flex flex-col">
+        <Card className="flex-1 flex flex-col h-full overflow-hidden">
           {!currentSession ? (
             <div className="flex-1 flex flex-col items-center justify-center p-8">
               <div className="text-center mb-8">
@@ -342,7 +342,7 @@ const Chat = () => {
           ) : (
             <>
               {/* Chat Header */}
-              <CardHeader className="pb-3">
+              <CardHeader className="pb-3 flex-shrink-0">
                 <div className="flex items-center justify-between">
                   <CardTitle className="flex items-center gap-2">
                     <Bot className="h-5 w-5" />
@@ -359,10 +359,10 @@ const Chat = () => {
                 </div>
               </CardHeader>
 
-              <Separator />
+              <Separator className="flex-shrink-0" />
 
               {/* Messages Area */}
-              <CardContent className="flex-1 p-0">
+              <CardContent className="flex-1 p-0 overflow-hidden">
                 <ScrollArea ref={scrollAreaRef} className="h-full p-4">
                   {messages.length === 0 ? (
                     <div className="text-center text-muted-foreground py-8">
@@ -425,10 +425,10 @@ const Chat = () => {
                 </ScrollArea>
               </CardContent>
 
-              <Separator />
+              <Separator className="flex-shrink-0" />
 
               {/* Input Area */}
-              <CardContent className="p-4">
+              <CardContent className="p-4 flex-shrink-0">
                 <div className="flex gap-2">
                   <Input
                     ref={inputRef}
