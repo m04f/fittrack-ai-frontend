@@ -130,6 +130,7 @@ export interface Plan {
 // User Plan Types
 export interface UserPlanWorkout {
   uuid: string;
+  plan: string;
   workout: string;
   name: string;
   record: string | null;

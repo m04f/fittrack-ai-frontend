@@ -18,6 +18,7 @@ import {
   TrendingUp,
   Users,
   Calendar,
+  Check,
 } from "lucide-react";
 import { Link } from "react-router-dom";
 import api from "@/services/api";
@@ -170,6 +171,7 @@ const Dashboard = () => {
       });
 
       if (todayWorkout) {
+        todayWorkout.plan = plan.uuid;
         setTodayWorkout(todayWorkout);
         return;
       }
@@ -192,12 +194,12 @@ const Dashboard = () => {
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card className="fitness-card border-2 border-fitness-200/50 shadow-lg hover:border-fitness-500/50 transition-all duration-200">
+        <Card className="fitness-card border-2 fitness-border-light shadow-lg hover:fitness-border transition-all duration-200">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-fitness-700 dark:text-fitness-400">
+            <CardTitle className="text-sm font-medium fitness-text-primary">
               Weekly Progress
             </CardTitle>
-            <Dumbbell className="h-4 w-4 text-fitness-600" />
+            <Dumbbell className="h-4 w-4 fitness-text-primary" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
@@ -213,12 +215,12 @@ const Dashboard = () => {
           </CardContent>
         </Card>
 
-        <Card className="fitness-card border-2 border-fitness-200/50 shadow-lg hover:border-fitness-500/50 transition-all duration-200">
+        <Card className="fitness-card border-2 fitness-border-light shadow-lg hover:fitness-border transition-all duration-200">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-fitness-700 dark:text-fitness-400">
+            <CardTitle className="text-sm font-medium fitness-text-primary">
               Current Streak
             </CardTitle>
-            <CalendarCheck className="h-4 w-4 text-fitness-600" />
+            <CalendarCheck className="h-4 w-4 fitness-text-primary" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{streak} days</div>
@@ -230,10 +232,12 @@ const Dashboard = () => {
           </CardContent>
         </Card>
 
-        <Card className="fitness-card border-2 border-fitness-200/50 shadow-lg hover:border-fitness-500/50 transition-all duration-200">
+        <Card className="fitness-card border-2 fitness-border-light shadow-lg hover:fitness-border transition-all duration-200">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-fitness-700 dark:text-fitness-400">Fitness Level</CardTitle>
-            <Award className="h-4 w-4 text-fitness-600" />
+            <CardTitle className="text-sm font-medium fitness-text-primary">
+              Fitness Level
+            </CardTitle>
+            <Award className="h-4 w-4 fitness-text-primary" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold capitalize">
@@ -247,10 +251,12 @@ const Dashboard = () => {
           </CardContent>
         </Card>
 
-        <Card className="fitness-card border-2 border-fitness-200/50 shadow-lg hover:border-fitness-500/50 transition-all duration-200">
+        <Card className="fitness-card border-2 fitness-border-light shadow-lg hover:fitness-border transition-all duration-200">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium text-fitness-700 dark:text-fitness-400">Goal</CardTitle>
-            <TrendingUp className="h-4 w-4 text-fitness-600" />
+            <CardTitle className="text-sm font-medium fitness-text-primary">
+              Goal
+            </CardTitle>
+            <TrendingUp className="h-4 w-4 fitness-text-primary" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold capitalize">
@@ -266,9 +272,11 @@ const Dashboard = () => {
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">
-        <Card className="fitness-card border-2 border-fitness-200/50 shadow-lg col-span-1">
+        <Card className="fitness-card border-2 fitness-border-light shadow-lg col-span-1">
           <CardHeader>
-            <CardTitle className="text-fitness-700 dark:text-fitness-400">Recent Workouts</CardTitle>
+            <CardTitle className="fitness-text-primary">
+              Recent Workouts
+            </CardTitle>
             <CardDescription>Your latest completed workouts</CardDescription>
           </CardHeader>
           <CardContent>
@@ -312,7 +320,7 @@ const Dashboard = () => {
                       </div>
 
                       {/* Exercise list for this workout record */}
-                      <div className="ml-10 pl-2 border-l-2 border-fitness-200/50">
+                      <div className="ml-10 pl-2 border-l-2 fitness-border-light">
                         {record.exercises.slice(0, 3).map((exercise, idx) => (
                           <div key={exercise.uuid} className="text-sm py-1">
                             <span className="font-medium">
@@ -352,16 +360,18 @@ const Dashboard = () => {
             )}
             <Link
               to="/workouts"
-              className="block text-sm text-fitness-600 mt-4 hover:underline"
+              className="block text-sm fitness-text-primary mt-4 hover:underline"
             >
               View all workouts
             </Link>
           </CardContent>
         </Card>
 
-        <Card className="fitness-card border-2 border-fitness-200/50 shadow-lg col-span-1">
+        <Card className="fitness-card border-2 fitness-border-light shadow-lg col-span-1">
           <CardHeader>
-            <CardTitle className="text-fitness-700 dark:text-fitness-400">Today's Workout</CardTitle>
+            <CardTitle className="fitness-text-primary">
+              Today's Workout
+            </CardTitle>
             <CardDescription>What's on your schedule for today</CardDescription>
           </CardHeader>
           <CardContent>
@@ -381,30 +391,37 @@ const Dashboard = () => {
               <div className="flex flex-col gap-4 p-2">
                 <div className="flex items-center gap-3 rounded-md hover:bg-muted p-2">
                   <div className="p-2 fitness-icon-bg rounded-full">
-                    <Timer className="h-5 w-5 text-fitness-primary-foreground" />
+                    {todayWorkout.record ? (
+                      <Check className="h-5 w-5 fitness-text-primary" />
+                    ) : (
+                      <Timer className="h-5 w-5 text-fitness-primary-foreground" />
+                    )}
                   </div>
                   <div className="flex-1">
-                    <div className="font-medium">{todayWorkout.name}</div>
+                    <div className="font-medium flex items-center gap-2">
+                      {todayWorkout.name}
+                      {todayWorkout.record && (
+                        <Check className="h-4 w-4 fitness-text-primary" />
+                      )}
+                    </div>
                     <div className="text-sm text-muted-foreground">
-                      Scheduled for today
+                      {todayWorkout.record
+                        ? "Completed today"
+                        : "Scheduled for today"}
                     </div>
                   </div>
                   <Button variant="ghost" size="icon" asChild>
                     <Link
-                      to={`/workouts/${todayWorkout.workout.split("/").pop()}`}
+                      to={`/workouts/${todayWorkout.workout}?planworkout=${todayWorkout.uuid}&plan=${todayWorkout.plan}`}
                     >
                       <ArrowRight className="h-4 w-4" />
                     </Link>
                   </Button>
                 </div>
                 {!todayWorkout.record ? (
-                  <Button
-                    asChild
-                    variant="fitness"
-                    className="w-full"
-                  >
+                  <Button asChild variant="fitness" className="w-full">
                     <Link
-                      to={`/workouts/${todayWorkout.workout.split("/").pop()}`}
+                      to={`/workouts/${todayWorkout.workout}?planworkout=${todayWorkout.uuid}&plan=${todayWorkout.plan}`}
                     >
                       Start Workout
                     </Link>
@@ -472,7 +489,7 @@ const Dashboard = () => {
             )}
             <Link
               to="/chat"
-              className="block text-sm text-fitness-600 mt-4 hover:underline"
+              className="block text-sm fitness-text-primary mt-4 hover:underline"
             >
               Get personalized recommendations from AI
             </Link>
