@@ -53,13 +53,13 @@
   }
 
   .dark {
-    --background: 240 10% 3.9%;
+    --background: 221 39% 11%;
     --foreground: 0 0% 98%;
 
-    --card: 240 10% 3.9%;
+    --card: 221 39% 11%;
     --card-foreground: 0 0% 98%;
 
-    --popover: 240 10% 3.9%;
+    --popover: 221 39% 11%;
     --popover-foreground: 0 0% 98%;
 
     --primary: 175 84% 32%;
@@ -81,7 +81,7 @@
     --input: 240 3.7% 15.9%;
     --ring: 175 84% 32%;
 
-    --sidebar-background: 240 10% 3.9%;
+    --sidebar-background: 221 39% 11%;
     --sidebar-foreground: 0 0% 98%;
     --sidebar-primary: 175 84% 32%;
     --sidebar-primary-foreground: 0 0% 98%;
