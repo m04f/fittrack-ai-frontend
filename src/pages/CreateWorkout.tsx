@@ -188,7 +188,7 @@ const CreateWorkout = () => {
         </div>
         <div className="shrink-0">
           <Button
-            className="bg-fitness-600 hover:bg-fitness-700"
+            variant="fitness"
             onClick={handleSubmit}
             disabled={isSubmitting}
           >

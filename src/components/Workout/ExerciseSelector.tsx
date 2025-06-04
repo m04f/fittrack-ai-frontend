@@ -75,7 +75,7 @@ const ExerciseSelector = ({ onAddExercise }: ExerciseSelectorProps) => {
   return (
     <Dialog open={isOpen} onOpenChange={setIsOpen}>
       <DialogTrigger asChild>
-        <Button className="bg-fitness-600 hover:bg-fitness-700">
+        <Button variant="fitness">
           <Plus className="mr-2 h-4 w-4" />
           Add Exercise
         </Button>
@@ -101,7 +101,7 @@ const ExerciseSelector = ({ onAddExercise }: ExerciseSelectorProps) => {
               {filteredExercises.map((exercise) => (
                 <Button
                   key={exercise.name}
-                  variant="outline"
+                  variant="fitness-outline"
                   className="justify-start h-auto py-3 px-4"
                   onClick={() => handleAddExercise(exercise.name)}
                 >

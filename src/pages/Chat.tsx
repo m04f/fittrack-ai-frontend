@@ -42,14 +42,14 @@ const Chat = () => {
       prompt:
         "I'd like you to design a personalized workout plan for me. Please consider my fitness level, goals, and any preferences I might have.",
       icon: <Calendar className="h-4 w-4" />,
-      color: "bg-blue-500",
+      color: "fitness-icon-bg",
     },
     {
       title: "Create a Meal Plan",
       prompt:
         "Can you help me create a nutritious meal plan that aligns with my fitness goals? Please include breakfast, lunch, dinner, and healthy snack options.",
       icon: <Utensils className="h-4 w-4" />,
-      color: "bg-green-500",
+      color: "fitness-icon-bg",
     },
   ];
 
@@ -219,18 +219,28 @@ const Chat = () => {
   };
 
   return (
-    <div className="container mx-auto p-6 max-w-7xl">
-      <div className="flex flex-col lg:flex-row gap-6 h-[calc(100vh-8rem)]">
+    <div className="container mx-auto p-6 max-w-7xl animate-enter">
+      <div className="mb-6">
+        <h1 className="text-3xl font-bold tracking-tight fitness-gradient-text">
+          AI Chat Assistant
+        </h1>
+        <p className="text-muted-foreground">
+          Get personalized fitness advice and workout recommendations
+        </p>
+      </div>
+
+      <div className="flex flex-col lg:flex-row gap-6 h-[calc(100vh-12rem)]">
         {/* Sessions Sidebar */}
-        <Card className="w-full lg:w-80 flex flex-col h-full">
+        <Card className="fitness-card border-2 fitness-border-light/50 shadow-lg w-full lg:w-80 flex flex-col h-full">
           <CardHeader className="pb-3 flex-shrink-0">
             <div className="flex items-center justify-between">
-              <CardTitle className="flex items-center gap-2">
-                <MessageCircle className="h-5 w-5" />
+              <CardTitle className="flex items-center gap-2 fitness-text-primary">
+                <MessageCircle className="h-5 w-5 fitness-text-primary" />
                 Chat Sessions
               </CardTitle>
               <Button
                 size="sm"
+                variant="fitness"
                 onClick={() => createNewSession()}
                 className="h-8 w-8 p-0"
               >
@@ -259,8 +269,8 @@ const Chat = () => {
                       key={session.uuid}
                       className={`group p-3 rounded-lg border cursor-pointer transition-colors ${
                         currentSession?.uuid === session.uuid
-                          ? "bg-primary/10 border-primary"
-                          : "hover:bg-muted/50"
+                          ? "fitness-bg-secondary/50 fitness-border"
+                          : "hover:bg-muted/50 fitness-border-light/30"
                       }`}
                       onClick={() => openSession(session.uuid)}
                     >
@@ -278,7 +288,7 @@ const Chat = () => {
                         </div>
                         <Button
                           size="sm"
-                          variant="ghost"
+                          variant="fitness-ghost"
                           className="opacity-0 group-hover:opacity-100 h-6 w-6 p-0 ml-2"
                           onClick={(e) => {
                             e.stopPropagation();
@@ -297,12 +307,14 @@ const Chat = () => {
         </Card>
 
         {/* Chat Area */}
-        <Card className="flex-1 flex flex-col h-full overflow-hidden">
+        <Card className="fitness-card border-2 fitness-border-light/50 shadow-lg flex-1 flex flex-col h-full overflow-hidden">
           {!currentSession ? (
             <div className="flex-1 flex flex-col items-center justify-center p-8">
               <div className="text-center mb-8">
-                <Bot className="h-16 w-16 mx-auto mb-4 text-muted-foreground" />
-                <h2 className="text-2xl font-semibold mb-2">
+                <div className="w-20 h-20 rounded-full fitness-icon-bg flex items-center justify-center mx-auto mb-4">
+                  <Bot className="h-10 w-10 text-fitness-primary-foreground" />
+                </div>
+                <h2 className="text-2xl font-semibold mb-2 fitness-gradient-text">
                   Welcome to FitTrack AI Assistant
                 </h2>
                 <p className="text-muted-foreground mb-6">
@@ -312,23 +324,21 @@ const Chat = () => {
               </div>
 
               <div className="w-full max-w-2xl">
-                <h3 className="font-semibold mb-4 flex items-center gap-2">
-                  <Sparkles className="h-4 w-4" />
+                <h3 className="font-semibold mb-4 flex items-center gap-2 fitness-text-primary">
+                  <Sparkles className="h-4 w-4 fitness-text-primary" />
                   Quick Start Prompts
                 </h3>
                 <div className="grid gap-3 md:grid-cols-2">
                   {preWrittenPrompts.map((prompt, index) => (
                     <Button
                       key={index}
-                      variant="outline"
+                      variant="fitness-outline"
                       className="h-auto p-4 text-left justify-start"
                       onClick={() =>
                         handlePromptClick(prompt.prompt, prompt.title)
                       }
                     >
-                      <div
-                        className={`p-2 rounded-md ${prompt.color} text-white mr-3`}
-                      >
+                      <div className="p-2 rounded-md fitness-icon-bg mr-3 shadow-md">
                         {prompt.icon}
                       </div>
                       <div>
@@ -344,14 +354,18 @@ const Chat = () => {
               {/* Chat Header */}
               <CardHeader className="pb-3 flex-shrink-0">
                 <div className="flex items-center justify-between">
-                  <CardTitle className="flex items-center gap-2">
-                    <Bot className="h-5 w-5" />
+                  <CardTitle className="flex items-center gap-2 fitness-text-primary">
+                    <Bot className="h-5 w-5 fitness-text-primary" />
                     {currentSession.title}
                   </CardTitle>
                   <div className="flex items-center gap-2">
                     <Badge
                       variant={isConnected ? "default" : "destructive"}
-                      className={isConnected ? "bg-green-500" : ""}
+                      className={
+                        isConnected
+                          ? "bg-fitness-primary text-fitness-primary-foreground"
+                          : ""
+                      }
                     >
                       {isConnected ? "Connected" : "Disconnected"}
                     </Badge>
@@ -381,14 +395,14 @@ const Chat = () => {
                           }`}
                         >
                           {message.role !== "user" && (
-                            <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center flex-shrink-0">
-                              <Bot className="h-4 w-4 text-primary-foreground" />
+                            <div className="w-8 h-8 rounded-full fitness-icon-bg flex items-center justify-center flex-shrink-0 shadow-md">
+                              <Bot className="h-4 w-4 text-fitness-primary-foreground" />
                             </div>
                           )}
                           <div
                             className={`max-w-[70%] rounded-lg p-3 ${
                               message.role === "user"
-                                ? "bg-primary text-primary-foreground"
+                                ? "fitness-button-primary shadow-md"
                                 : "bg-muted"
                             }`}
                           >
@@ -400,16 +414,16 @@ const Chat = () => {
                             </p>
                           </div>
                           {message.role === "user" && (
-                            <div className="w-8 h-8 rounded-full bg-muted flex items-center justify-center flex-shrink-0">
-                              <User className="h-4 w-4" />
+                            <div className="w-8 h-8 rounded-full fitness-user-avatar flex items-center justify-center flex-shrink-0 shadow-md">
+                              <User className="h-4 w-4 fitness-text-primary" />
                             </div>
                           )}
                         </div>
                       ))}
                       {isLoading && (
                         <div className="flex gap-3 justify-start">
-                          <div className="w-8 h-8 rounded-full bg-primary flex items-center justify-center flex-shrink-0">
-                            <Bot className="h-4 w-4 text-primary-foreground" />
+                          <div className="w-8 h-8 rounded-full fitness-icon-bg flex items-center justify-center flex-shrink-0 shadow-md">
+                            <Bot className="h-4 w-4 text-fitness-primary-foreground" />
                           </div>
                           <div className="bg-muted rounded-lg p-3">
                             <div className="flex space-x-1">
@@ -443,6 +457,7 @@ const Chat = () => {
                     onClick={() => sendMessage(inputMessage)}
                     disabled={!inputMessage.trim() || !isConnected || isLoading}
                     size="sm"
+                    variant="fitness"
                   >
                     <Send className="h-4 w-4" />
                   </Button>

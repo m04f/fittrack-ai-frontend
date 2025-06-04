@@ -18,6 +18,10 @@ const buttonVariants = cva(
           "bg-secondary text-secondary-foreground hover:bg-secondary/80",
         ghost: "hover:bg-accent hover:text-accent-foreground",
         link: "text-primary underline-offset-4 hover:underline",
+        fitness: "fitness-button-primary",
+        "fitness-secondary": "fitness-button-secondary",
+        "fitness-outline": "border-2 border-fitness-primary bg-background text-fitness-primary hover:bg-fitness-primary hover:text-fitness-primary-foreground font-semibold transition-all duration-200",
+        "fitness-ghost": "text-fitness-primary hover:bg-fitness-secondary hover:text-fitness-secondary-foreground font-semibold transition-all duration-200",
       },
       size: {
         default: "h-10 px-4 py-2",

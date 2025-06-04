@@ -43,6 +43,13 @@
     --sidebar-accent-foreground: 175 84% 32%;
     --sidebar-border: 220 13% 91%;
     --sidebar-ring: 175 84% 32%;
+
+    --fitness-primary: 175 84% 32%;
+    --fitness-primary-foreground: 0 0% 98%;
+    --fitness-secondary: 175 84% 92%;
+    --fitness-secondary-foreground: 175 84% 32%;
+    --fitness-accent: 175 60% 45%;
+    --fitness-accent-foreground: 0 0% 98%;
   }
 
   .dark {
@@ -82,6 +89,13 @@
     --sidebar-accent-foreground: 0 0% 98%;
     --sidebar-border: 240 3.7% 15.9%;
     --sidebar-ring: 175 84% 32%;
+
+    --fitness-primary: 175 84% 45%;
+    --fitness-primary-foreground: 0 0% 98%;
+    --fitness-secondary: 240 3.7% 15.9%;
+    --fitness-secondary-foreground: 175 84% 65%;
+    --fitness-accent: 175 60% 55%;
+    --fitness-accent-foreground: 240 10% 3.9%;
   }
 }
 
@@ -91,7 +105,7 @@
   }
 
   body {
-    @apply bg-background text-foreground;
+    @apply bg-gradient-to-br from-fitness-50 to-fitness-100 dark:from-gray-900 dark:to-gray-800 text-foreground min-h-screen;
   }
 }
 
@@ -112,4 +126,110 @@
 
 .progress-gradient {
   @apply bg-gradient-to-r from-fitness-500 to-fitness-700;
+}
+
+/* Enhanced card styling for consistent theme */
+.fitness-card {
+  @apply bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm shadow-lg border-0;
+}
+
+/* Gradient button styling */
+.fitness-button {
+  @apply bg-gradient-to-r from-fitness-600 to-fitness-700 hover:from-fitness-700 hover:to-fitness-800 dark:from-fitness-500 dark:to-fitness-600 dark:hover:from-fitness-600 dark:hover:to-fitness-700 text-white font-semibold shadow-lg transition-all duration-200;
+}
+
+/* CSS custom property based fitness buttons for better dark mode support */
+.fitness-button-primary {
+  background: linear-gradient(to right, hsl(var(--fitness-primary)), hsl(var(--fitness-accent)));
+  color: hsl(var(--fitness-primary-foreground));
+  @apply font-semibold shadow-lg transition-all duration-200 hover:shadow-xl;
+}
+
+.fitness-button-primary:hover {
+  filter: brightness(0.9);
+  transform: translateY(-1px);
+}
+
+.fitness-button-secondary {
+  background: hsl(var(--fitness-secondary));
+  color: hsl(var(--fitness-secondary-foreground));
+  border: 2px solid hsl(var(--fitness-primary));
+  @apply font-semibold shadow-md transition-all duration-200 hover:shadow-lg;
+}
+
+.fitness-button-secondary:hover {
+  background: hsl(var(--fitness-primary));
+  color: hsl(var(--fitness-primary-foreground));
+}
+
+/* Comprehensive fitness theme utilities */
+.fitness-gradient-primary {
+  background: linear-gradient(to right, hsl(var(--fitness-primary)), hsl(var(--fitness-accent)));
+}
+
+.fitness-gradient-text {
+  background: linear-gradient(to right, hsl(var(--fitness-primary)), hsl(var(--fitness-accent)));
+  background-clip: text;
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.fitness-icon-bg {
+  background: linear-gradient(to right, hsl(var(--fitness-primary)), hsl(var(--fitness-accent)));
+  @apply text-white shadow-lg;
+}
+
+.fitness-avatar-bg {
+  background: linear-gradient(to right, hsl(var(--fitness-primary)), hsl(var(--fitness-accent)));
+  @apply text-white font-semibold;
+}
+
+.fitness-border {
+  border-color: hsl(var(--fitness-primary));
+}
+
+.fitness-border-light {
+  border-color: hsl(var(--fitness-secondary));
+}
+
+.fitness-focus {
+  @apply focus:border-fitness-primary focus:ring-fitness-primary/20;
+}
+
+.fitness-text-primary {
+  color: hsl(var(--fitness-primary));
+}
+
+.fitness-text-secondary {
+  color: hsl(var(--fitness-secondary-foreground));
+}
+
+.fitness-bg-primary {
+  background: hsl(var(--fitness-primary));
+  color: hsl(var(--fitness-primary-foreground));
+}
+
+.fitness-bg-secondary {
+  background: hsl(var(--fitness-secondary));
+  color: hsl(var(--fitness-secondary-foreground));
+}
+
+.fitness-hover-primary {
+  @apply hover:bg-fitness-primary hover:text-fitness-primary-foreground;
+}
+
+.fitness-user-avatar {
+  background: linear-gradient(to right, hsl(var(--fitness-secondary)), hsl(var(--fitness-primary) / 0.3));
+  color: hsl(var(--fitness-primary));
+  @apply shadow-md;
+}
+
+/* Enhanced gradient backgrounds */
+.fitness-gradient-bg {
+  @apply bg-gradient-to-br from-fitness-50 to-fitness-100 dark:from-gray-900 dark:to-gray-800;
+}
+
+/* Sidebar styling */
+.fitness-sidebar {
+  @apply bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm border-r border-gray-200/50 dark:border-gray-700/50;
 }

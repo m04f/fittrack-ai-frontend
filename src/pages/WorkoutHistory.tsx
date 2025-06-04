@@ -62,16 +62,16 @@ const WorkoutHistory = () => {
   return (
     <div className="animate-enter space-y-6">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Workout History</h1>
+        <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-fitness-600 to-fitness-700 bg-clip-text text-transparent">Workout History</h1>
         <p className="text-muted-foreground">
           View your past workout records and performance
         </p>
       </div>
 
-      <Card>
+      <Card className="fitness-card border-2 border-fitness-200/50 shadow-lg">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <History className="h-5 w-5" />
+          <CardTitle className="flex items-center gap-2 text-fitness-700 dark:text-fitness-400">
+            <History className="h-5 w-5 text-fitness-600" />
             Your Workout Records
           </CardTitle>
           <CardDescription>Track your progress over time</CardDescription>
@@ -129,14 +129,14 @@ const WorkoutHistory = () => {
                     <TableCell>
                       <Badge
                         variant="outline"
-                        className="flex items-center gap-1 w-fit"
+                        className="flex items-center gap-1 w-fit border-fitness-200/50"
                       >
-                        <Dumbbell className="h-3 w-3" />
+                        <Dumbbell className="h-3 w-3 text-fitness-600" />
                         {record.exercises.length}
                       </Badge>
                     </TableCell>
                     <TableCell className="text-right">
-                      <Button asChild size="sm" variant="outline">
+                      <Button asChild size="sm" variant="outline" className="border-2 border-fitness-600 text-fitness-600 hover:bg-fitness-600 hover:text-white transition-all duration-200">
                         <Link to={`/history/${record.uuid}`}>
                           Details
                           <ArrowRight className="ml-1 h-4 w-4" />
@@ -149,13 +149,15 @@ const WorkoutHistory = () => {
             </Table>
           ) : (
             <div className="flex flex-col items-center justify-center py-12">
-              <History className="h-12 w-12 text-muted-foreground mb-4" />
+              <div className="w-16 h-16 rounded-full bg-gradient-to-r from-fitness-500 to-fitness-600 flex items-center justify-center mb-4 shadow-lg">
+                <History className="h-8 w-8 text-white" />
+              </div>
               <h3 className="text-lg font-medium">No workout records found</h3>
               <p className="text-sm text-muted-foreground mt-1">
                 Start recording workouts to track your progress
               </p>
               <Button
-                className="mt-4 bg-fitness-600 hover:bg-fitness-700"
+                className="mt-4 bg-gradient-to-r from-fitness-600 to-fitness-700 hover:from-fitness-700 hover:to-fitness-800 text-white font-semibold shadow-lg transition-all duration-200"
                 asChild
               >
                 <Link to="/workouts">Find a Workout</Link>

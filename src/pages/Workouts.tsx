@@ -68,18 +68,18 @@ const WorkoutsPage = () => {
 
   const renderWorkoutCard = (workout: Workout) => {
     return (
-      <Card key={workout.uuid} className="h-full flex flex-col">
+      <Card key={workout.uuid} className="fitness-card border-2 border-fitness-200/50 shadow-lg hover:border-fitness-500/50 transition-all duration-200 h-full flex flex-col">
         <CardHeader>
           <div className="flex justify-between items-start">
             <div>
-              <CardTitle className="text-xl">{workout.name}</CardTitle>
+              <CardTitle className="text-xl text-fitness-700 dark:text-fitness-400">{workout.name}</CardTitle>
               <CardDescription className="line-clamp-2 mt-1">
                 {workout.description || "No description available"}
               </CardDescription>
             </div>
             <Badge
               variant={workout.public ? "default" : "outline"}
-              className={workout.public ? "bg-fitness-500" : ""}
+              className={workout.public ? "bg-gradient-to-r from-fitness-600 to-fitness-700 hover:from-fitness-700 hover:to-fitness-800 text-white" : "border-fitness-200/50"}
             >
               {workout.public ? "Public" : "Private"}
             </Badge>
@@ -87,7 +87,7 @@ const WorkoutsPage = () => {
         </CardHeader>
         <CardContent className="flex-1 flex flex-col">
           <div className="flex items-center mb-4 text-sm text-muted-foreground">
-            <Clock className="w-4 h-4 mr-2" />
+            <Clock className="w-4 h-4 mr-2 text-fitness-600" />
             <span>
               {(() => {
                 const totalSeconds = workout.total_duration;
@@ -97,7 +97,7 @@ const WorkoutsPage = () => {
               })()}
             </span>
             <Separator orientation="vertical" className="mx-2 h-4" />
-            <Dumbbell className="w-4 h-4 mr-2" />
+            <Dumbbell className="w-4 h-4 mr-2 text-fitness-600" />
             <span>{workout.exercise_names?.length || 0} exercises</span>
           </div>
           <div className="flex-1">
@@ -121,7 +121,7 @@ const WorkoutsPage = () => {
             <span className="text-xs text-muted-foreground">
               Created by: {workout.creator || "Unknown Creator"}
             </span>
-            <Button asChild size="sm" variant="outline">
+            <Button asChild size="sm" variant="outline" className="border-2 border-fitness-600 text-fitness-600 hover:bg-fitness-600 hover:text-white transition-all duration-200">
               <Link to={`/workouts/${workout.uuid}`}>
                 View <ArrowRight className="ml-1 h-4 w-4" />
               </Link>
@@ -133,7 +133,7 @@ const WorkoutsPage = () => {
   };
 
   const renderSkeletonCard = (index: number) => (
-    <Card key={index} className="h-full">
+    <Card key={index} className="fitness-card border-2 border-fitness-200/50 shadow-lg h-full">
       <CardHeader>
         <div className="flex justify-between">
           <div className="space-y-2">
@@ -163,7 +163,7 @@ const WorkoutsPage = () => {
   return (
     <div className="animate-enter space-y-6">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Workout Library</h1>
+        <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-fitness-600 to-fitness-700 bg-clip-text text-transparent">Workout Library</h1>
         <p className="text-muted-foreground">
           Browse and manage your workout routines
         </p>
@@ -180,17 +180,17 @@ const WorkoutsPage = () => {
           />
         </div>
         <div className="flex gap-2">
-          <Button variant="outline" asChild>
+          <Button variant="outline" asChild className="border-2 border-fitness-200/50 hover:border-fitness-500/50 hover:bg-fitness-50/50 dark:hover:bg-fitness-900/20 transition-all duration-200">
             <Link to="/history">
               <History className="mr-2 h-4 w-4" />
               History
             </Link>
           </Button>
-          <Button variant="outline">
+          <Button variant="outline" className="border-2 border-fitness-200/50 hover:border-fitness-500/50 hover:bg-fitness-50/50 dark:hover:bg-fitness-900/20 transition-all duration-200">
             <Filter className="mr-2 h-4 w-4" />
             Filter
           </Button>
-          <Button className="bg-fitness-600 hover:bg-fitness-700" asChild>
+          <Button variant="fitness" asChild>
             <Link to="/workouts/create">
               <Plus className="mr-2 h-4 w-4" />
               New Workout
@@ -210,14 +210,16 @@ const WorkoutsPage = () => {
               filteredWorkouts.map(renderWorkoutCard)
             ) : (
               <div className="col-span-full flex flex-col items-center justify-center py-12">
-                <Dumbbell className="h-12 w-12 text-muted-foreground mb-4" />
+                <div className="w-16 h-16 rounded-full bg-gradient-to-r from-fitness-500 to-fitness-600 flex items-center justify-center mb-4 shadow-lg">
+                  <Dumbbell className="h-8 w-8 text-white" />
+                </div>
                 <h3 className="text-lg font-medium">No workouts found</h3>
                 <p className="text-sm text-muted-foreground mt-1">
                   {searchTerm
                     ? "Try a different search term"
                     : "Create your first workout to get started"}
                 </p>
-                <Button className="mt-4 bg-fitness-600 hover:bg-fitness-700" asChild>
+                <Button className="mt-4" variant="fitness" asChild>
                   <Link to="/workouts/create">
                     <Plus className="mr-2 h-4 w-4" />
                     Create Workout

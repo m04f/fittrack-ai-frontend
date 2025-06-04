@@ -73,9 +73,9 @@ const RegisterForm = () => {
   const passwordStrength = getPasswordStrength(watchPassword || "");
 
   const getStrengthColor = (strength: number) => {
-    if (strength < 2) return "bg-red-500";
+    if (strength < 2) return "bg-destructive";
     if (strength < 4) return "bg-yellow-500";
-    return "bg-green-500";
+    return "fitness-icon-bg";
   };
 
   const getStrengthText = (strength: number) => {
@@ -95,14 +95,14 @@ const RegisterForm = () => {
   };
 
   return (
-    <Card className="w-full max-w-md mx-auto shadow-2xl border-0 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm">
+    <Card className="w-full max-w-md mx-auto shadow-2xl border-0 fitness-card">
       <CardHeader className="text-center pb-6">
         <div className="flex justify-center mb-4">
-          <div className="p-3 rounded-full bg-gradient-to-r from-fitness-500 to-fitness-600 shadow-lg">
-            <Dumbbell className="h-10 w-10 text-white" />
+          <div className="p-3 rounded-full fitness-icon-bg">
+            <Dumbbell className="h-10 w-10 text-fitness-primary-foreground" />
           </div>
         </div>
-        <CardTitle className="text-3xl font-bold bg-gradient-to-r from-fitness-600 to-fitness-700 bg-clip-text text-transparent">
+        <CardTitle className="text-3xl font-bold fitness-gradient-text">
           Join FitTrack AI
         </CardTitle>
         <CardDescription className="text-lg text-muted-foreground mt-2">
@@ -125,7 +125,7 @@ const RegisterForm = () => {
                       <Input
                         {...field}
                         placeholder="Choose a unique username"
-                        className="pl-10 h-11 border-2 transition-all duration-200 focus:border-fitness-500"
+                        className="pl-10 h-11 border-2 transition-all duration-200 fitness-focus"
                       />
                     </div>
                   </FormControl>
@@ -147,7 +147,7 @@ const RegisterForm = () => {
                         {...field}
                         type="email"
                         placeholder="Enter your email address"
-                        className="pl-10 h-11 border-2 transition-all duration-200 focus:border-fitness-500"
+                        className="pl-10 h-11 border-2 transition-all duration-200 fitness-focus"
                       />
                     </div>
                   </FormControl>
@@ -169,7 +169,7 @@ const RegisterForm = () => {
                         {...field}
                         type={showPassword ? "text" : "password"}
                         placeholder="Create a strong password"
-                        className="pl-10 pr-10 h-11 border-2 transition-all duration-200 focus:border-fitness-500"
+                        className="pl-10 pr-10 h-11 border-2 transition-all duration-200 fitness-focus"
                       />
                       <button
                         type="button"
@@ -235,7 +235,7 @@ const RegisterForm = () => {
                         {...field}
                         type={showConfirmPassword ? "text" : "password"}
                         placeholder="Confirm your password"
-                        className="pl-10 pr-10 h-11 border-2 transition-all duration-200 focus:border-fitness-500"
+                        className="pl-10 pr-10 h-11 border-2 transition-all duration-200 fitness-focus"
                       />
                       <button
                         type="button"
@@ -270,11 +270,11 @@ const RegisterForm = () => {
                   <div className="space-y-1 leading-none">
                     <FormLabel className="text-sm">
                       I agree to the{" "}
-                      <Link to="/terms" className="text-fitness-600 hover:text-fitness-700 underline">
+                      <Link to="/terms" className="fitness-text-primary hover:brightness-90 underline">
                         Terms of Service
                       </Link>{" "}
                       and{" "}
-                      <Link to="/privacy" className="text-fitness-600 hover:text-fitness-700 underline">
+                      <Link to="/privacy" className="fitness-text-primary hover:brightness-90 underline">
                         Privacy Policy
                       </Link>
                     </FormLabel>
@@ -286,7 +286,7 @@ const RegisterForm = () => {
 
             <Button
               type="submit"
-              className="w-full h-12 bg-gradient-to-r from-fitness-600 to-fitness-700 hover:from-fitness-700 hover:to-fitness-800 text-white font-semibold text-lg shadow-lg transition-all duration-200"
+              className="w-full h-12 fitness-button-primary text-lg"
               disabled={form.formState.isSubmitting}
             >
               {form.formState.isSubmitting ? (
@@ -302,13 +302,13 @@ const RegisterForm = () => {
         </Form>
       </CardContent>
 
-      <CardFooter className="pt-6 border-t border-gray-100 dark:border-gray-800">
+      <CardFooter className="pt-6 border-t fitness-border-light">
         <div className="w-full text-center">
           <div className="text-sm text-muted-foreground">
             Already have an account?{" "}
             <Link 
               to="/login" 
-              className="font-semibold text-fitness-600 hover:text-fitness-700 transition-colors duration-200"
+              className="font-semibold fitness-text-primary hover:brightness-90 transition-colors duration-200"
             >
               Sign in instead
             </Link>

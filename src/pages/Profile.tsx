@@ -80,19 +80,19 @@ const ProfilePage = () => {
   return (
     <div className="animate-enter space-y-6">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">My Profile</h1>
+        <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-fitness-600 to-fitness-700 bg-clip-text text-transparent">My Profile</h1>
         <p className="text-muted-foreground">Manage your personal information and fitness details</p>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {/* Profile Overview Card */}
-        <Card className="md:col-span-1">
+        <Card className="fitness-card border-2 border-fitness-200/50 shadow-lg md:col-span-1">
           <CardHeader>
-            <CardTitle>Profile Overview</CardTitle>
+            <CardTitle className="text-fitness-700 dark:text-fitness-400">Profile Overview</CardTitle>
           </CardHeader>
           <CardContent className="flex flex-col items-center text-center">
-            <div className="w-24 h-24 rounded-full bg-muted flex items-center justify-center mb-4">
-              <User className="h-12 w-12 text-muted-foreground" />
+            <div className="w-24 h-24 rounded-full bg-gradient-to-r from-fitness-500 to-fitness-600 flex items-center justify-center mb-4 shadow-lg">
+              <User className="h-12 w-12 text-white" />
             </div>
             <h2 className="text-xl font-bold">{user?.fullname || user?.username}</h2>
             <p className="text-muted-foreground">{user?.email}</p>
@@ -163,16 +163,16 @@ const ProfilePage = () => {
         </Card>
 
         {/* Edit Profile Card */}
-        <Card className="md:col-span-2">
+        <Card className="fitness-card border-2 border-fitness-200/50 shadow-lg md:col-span-2">
           <CardHeader>
-            <CardTitle>Edit Profile</CardTitle>
+            <CardTitle className="text-fitness-700 dark:text-fitness-400">Edit Profile</CardTitle>
             <CardDescription>Update your fitness profile and personal information</CardDescription>
           </CardHeader>
           <CardContent>
             <Tabs defaultValue="personal" className="w-full">
-              <TabsList className="grid w-full grid-cols-2">
-                <TabsTrigger value="personal">Personal Info</TabsTrigger>
-                <TabsTrigger value="fitness">Fitness Details</TabsTrigger>
+              <TabsList className="fitness-card border border-fitness-200/50 grid w-full grid-cols-2">
+                <TabsTrigger value="personal" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-fitness-600 data-[state=active]:to-fitness-700 data-[state=active]:text-white">Personal Info</TabsTrigger>
+                <TabsTrigger value="fitness" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-fitness-600 data-[state=active]:to-fitness-700 data-[state=active]:text-white">Fitness Details</TabsTrigger>
               </TabsList>
               <form onSubmit={handleSubmit}>
                 <TabsContent value="personal" className="space-y-4 pt-4">
@@ -297,7 +297,7 @@ const ProfilePage = () => {
                 <div className="flex justify-end pt-6">
                   <Button 
                     type="submit" 
-                    className="bg-fitness-600 hover:bg-fitness-700"
+                    className="bg-gradient-to-r from-fitness-600 to-fitness-700 hover:from-fitness-700 hover:to-fitness-800 text-white font-semibold shadow-lg transition-all duration-200"
                     disabled={isUpdating}
                   >
                     {isUpdating ? "Saving..." : "Save Changes"}

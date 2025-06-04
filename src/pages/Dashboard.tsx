@@ -183,7 +183,7 @@ const Dashboard = () => {
   return (
     <div className="animate-enter space-y-8">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">
+        <h1 className="text-3xl font-bold tracking-tight fitness-gradient-text">
           Welcome back, {user?.fullname?.split(" ")[0] || user?.username}
         </h1>
         <p className="text-muted-foreground">
@@ -192,12 +192,12 @@ const Dashboard = () => {
       </div>
 
       <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-4">
-        <Card>
+        <Card className="fitness-card border-2 border-fitness-200/50 shadow-lg hover:border-fitness-500/50 transition-all duration-200">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">
+            <CardTitle className="text-sm font-medium text-fitness-700 dark:text-fitness-400">
               Weekly Progress
             </CardTitle>
-            <Dumbbell className="h-4 w-4 text-muted-foreground" />
+            <Dumbbell className="h-4 w-4 text-fitness-600" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">
@@ -213,12 +213,12 @@ const Dashboard = () => {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="fitness-card border-2 border-fitness-200/50 shadow-lg hover:border-fitness-500/50 transition-all duration-200">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">
+            <CardTitle className="text-sm font-medium text-fitness-700 dark:text-fitness-400">
               Current Streak
             </CardTitle>
-            <CalendarCheck className="h-4 w-4 text-muted-foreground" />
+            <CalendarCheck className="h-4 w-4 text-fitness-600" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold">{streak} days</div>
@@ -230,10 +230,10 @@ const Dashboard = () => {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="fitness-card border-2 border-fitness-200/50 shadow-lg hover:border-fitness-500/50 transition-all duration-200">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Fitness Level</CardTitle>
-            <Award className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium text-fitness-700 dark:text-fitness-400">Fitness Level</CardTitle>
+            <Award className="h-4 w-4 text-fitness-600" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold capitalize">
@@ -247,10 +247,10 @@ const Dashboard = () => {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="fitness-card border-2 border-fitness-200/50 shadow-lg hover:border-fitness-500/50 transition-all duration-200">
           <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-medium">Goal</CardTitle>
-            <TrendingUp className="h-4 w-4 text-muted-foreground" />
+            <CardTitle className="text-sm font-medium text-fitness-700 dark:text-fitness-400">Goal</CardTitle>
+            <TrendingUp className="h-4 w-4 text-fitness-600" />
           </CardHeader>
           <CardContent>
             <div className="text-2xl font-bold capitalize">
@@ -266,9 +266,9 @@ const Dashboard = () => {
       </div>
 
       <div className="grid gap-4 md:grid-cols-2">
-        <Card className="col-span-1">
+        <Card className="fitness-card border-2 border-fitness-200/50 shadow-lg col-span-1">
           <CardHeader>
-            <CardTitle>Recent Workouts</CardTitle>
+            <CardTitle className="text-fitness-700 dark:text-fitness-400">Recent Workouts</CardTitle>
             <CardDescription>Your latest completed workouts</CardDescription>
           </CardHeader>
           <CardContent>
@@ -293,8 +293,8 @@ const Dashboard = () => {
                       className="flex flex-col gap-2 p-2 rounded-md hover:bg-muted"
                     >
                       <div className="flex items-center gap-3">
-                        <div className="p-2 bg-secondary rounded-full">
-                          <Dumbbell className="h-5 w-5" />
+                        <div className="p-2 fitness-icon-bg rounded-full">
+                          <Dumbbell className="h-5 w-5 text-fitness-primary-foreground" />
                         </div>
                         <div className="flex-1">
                           <div className="font-medium">
@@ -312,7 +312,7 @@ const Dashboard = () => {
                       </div>
 
                       {/* Exercise list for this workout record */}
-                      <div className="ml-10 pl-2 border-l-2 border-secondary/50">
+                      <div className="ml-10 pl-2 border-l-2 border-fitness-200/50">
                         {record.exercises.slice(0, 3).map((exercise, idx) => (
                           <div key={exercise.uuid} className="text-sm py-1">
                             <span className="font-medium">
@@ -344,7 +344,7 @@ const Dashboard = () => {
               <div className="text-center py-6">
                 <p className="text-muted-foreground">No workout records yet</p>
                 <Link to="/history">
-                  <Button className="mt-4 bg-fitness-600 hover:bg-fitness-700">
+                  <Button variant="fitness" className="mt-4">
                     View Workout History
                   </Button>
                 </Link>
@@ -359,9 +359,9 @@ const Dashboard = () => {
           </CardContent>
         </Card>
 
-        <Card className="col-span-1">
+        <Card className="fitness-card border-2 border-fitness-200/50 shadow-lg col-span-1">
           <CardHeader>
-            <CardTitle>Today's Workout</CardTitle>
+            <CardTitle className="text-fitness-700 dark:text-fitness-400">Today's Workout</CardTitle>
             <CardDescription>What's on your schedule for today</CardDescription>
           </CardHeader>
           <CardContent>
@@ -380,8 +380,8 @@ const Dashboard = () => {
             ) : todayWorkout ? (
               <div className="flex flex-col gap-4 p-2">
                 <div className="flex items-center gap-3 rounded-md hover:bg-muted p-2">
-                  <div className="p-2 bg-secondary rounded-full">
-                    <Timer className="h-5 w-5" />
+                  <div className="p-2 fitness-icon-bg rounded-full">
+                    <Timer className="h-5 w-5 text-fitness-primary-foreground" />
                   </div>
                   <div className="flex-1">
                     <div className="font-medium">{todayWorkout.name}</div>
@@ -400,7 +400,8 @@ const Dashboard = () => {
                 {!todayWorkout.record ? (
                   <Button
                     asChild
-                    className="bg-fitness-600 hover:bg-fitness-700 w-full"
+                    variant="fitness"
+                    className="w-full"
                   >
                     <Link
                       to={`/workouts/${todayWorkout.workout.split("/").pop()}`}
@@ -434,8 +435,8 @@ const Dashboard = () => {
                     key={workout.uuid}
                     className="flex items-center gap-3 p-2 rounded-md hover:bg-muted"
                   >
-                    <div className="p-2 bg-secondary rounded-full">
-                      <Timer className="h-5 w-5" />
+                    <div className="p-2 fitness-icon-bg rounded-full">
+                      <Timer className="h-5 w-5 text-fitness-primary-foreground" />
                     </div>
                     <div className="flex-1">
                       <div className="font-medium">{workout.name}</div>
@@ -463,7 +464,7 @@ const Dashboard = () => {
                   No workout suggestions available
                 </p>
                 <Link to="/chat">
-                  <Button className="mt-4 bg-fitness-600 hover:bg-fitness-700">
+                  <Button variant="fitness" className="mt-4">
                     Ask AI for suggestions
                   </Button>
                 </Link>

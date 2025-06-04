@@ -117,7 +117,7 @@ const PlansPage = () => {
   return (
     <div className="animate-enter space-y-6">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">My Active Plans</h1>
+        <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-fitness-600 to-fitness-700 bg-clip-text text-transparent">My Active Plans</h1>
         <p className="text-muted-foreground">
           Track your ongoing training plans and progress
         </p>
@@ -135,7 +135,7 @@ const PlansPage = () => {
         </div>
         <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
           <DialogTrigger asChild>
-            <Button className="bg-fitness-600 hover:bg-fitness-700">
+            <Button variant="fitness">
               <Plus className="mr-2 h-4 w-4" />
               Enroll in Plan
             </Button>
@@ -150,13 +150,13 @@ const PlansPage = () => {
             <div className="grid gap-4 py-4">
               {availablePlans.length > 0 ? (
                 availablePlans.map((plan) => (
-                  <Card key={plan.uuid} className="overflow-hidden">
+                  <Card key={plan.uuid} className="fitness-card border-2 border-fitness-200/50 shadow-lg hover:border-fitness-500/50 transition-all duration-200 overflow-hidden">
                     <CardHeader className="pb-2">
                       <div className="flex justify-between items-start">
                         <CardTitle className="text-lg">{plan.name}</CardTitle>
                         <Badge
                           variant={plan.public ? "default" : "outline"}
-                          className={plan.public ? "bg-fitness-500" : ""}
+                          className={plan.public ? "bg-gradient-to-r from-fitness-600 to-fitness-700 hover:from-fitness-700 hover:to-fitness-800 text-white" : "border-fitness-200/50"}
                         >
                           {plan.public ? "Public" : "Private"}
                         </Badge>
@@ -178,6 +178,7 @@ const PlansPage = () => {
                           )
                         }
                         size="sm"
+                        className="bg-gradient-to-r from-fitness-600 to-fitness-700 hover:from-fitness-700 hover:to-fitness-800 text-white font-semibold shadow-lg transition-all duration-200 disabled:opacity-50"
                       >
                         {userPlans.some(
                           (userPlan) => userPlan.plan === plan.uuid,
@@ -206,7 +207,7 @@ const PlansPage = () => {
       {loading ? (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
           {[...Array(3)].map((_, i) => (
-            <Card key={i}>
+            <Card key={i} className="fitness-card border-2 border-fitness-200/50 shadow-lg">
               <CardHeader>
                 <div className="flex justify-between">
                   <Skeleton className="h-6 w-[150px]" />
@@ -241,9 +242,9 @@ const PlansPage = () => {
                 const totalWorkouts = userPlan.workouts.length;
 
                 return (
-                  <Card key={userPlan.uuid} className="flex flex-col h-full">
+                  <Card key={userPlan.uuid} className="fitness-card border-2 border-fitness-200/50 shadow-lg hover:border-fitness-500/50 transition-all duration-200 flex flex-col h-full">
                     <CardHeader>
-                      <CardTitle className="text-xl">
+                      <CardTitle className="text-xl text-fitness-700 dark:text-fitness-400">
                         Training Plan (Started{" "}
                         {format(new Date(userPlan.start_date), "PP")})
                       </CardTitle>
@@ -251,7 +252,7 @@ const PlansPage = () => {
                     <CardContent className="flex-1 flex flex-col">
                       <div className="mb-4">
                         <div className="flex items-center mb-2">
-                          <Calendar className="h-4 w-4 mr-2 text-muted-foreground" />
+                          <Calendar className="h-4 w-4 mr-2 text-fitness-600" />
                           <span className="text-sm font-medium">
                             {totalWorkouts} workouts • {completedWorkouts}{" "}
                             completed
@@ -260,7 +261,7 @@ const PlansPage = () => {
 
                         <div className="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700 mb-3">
                           <div
-                            className="bg-fitness-500 h-2.5 rounded-full"
+                            className="bg-gradient-to-r from-fitness-600 to-fitness-700 h-2.5 rounded-full transition-all duration-300"
                             style={{
                               width: `${(completedWorkouts / totalWorkouts) * 100}%`,
                             }}
@@ -291,12 +292,12 @@ const PlansPage = () => {
 
                       <div className="flex justify-between mt-auto items-center">
                         <div className="flex items-center">
-                          <CalendarCheck className="h-4 w-4 mr-2 text-fitness-500" />
+                          <CalendarCheck className="h-4 w-4 mr-2 text-fitness-600" />
                           <span className="text-sm">
                             {completedWorkouts}/{totalWorkouts}
                           </span>
                         </div>
-                        <Button asChild size="sm" variant="outline">
+                        <Button asChild size="sm" variant="outline" className="border-2 border-fitness-600 text-fitness-600 hover:bg-fitness-600 hover:text-white transition-all duration-200">
                           <Link to={`/plans/${userPlan.uuid}`}>
                             View Calendar{" "}
                             <ArrowRight className="ml-1 h-4 w-4" />
@@ -310,7 +311,9 @@ const PlansPage = () => {
             </div>
           ) : (
             <div className="col-span-full flex flex-col items-center justify-center py-12">
-              <FileText className="h-12 w-12 text-muted-foreground mb-4" />
+              <div className="w-16 h-16 rounded-full bg-gradient-to-r from-fitness-500 to-fitness-600 flex items-center justify-center mb-4 shadow-lg">
+                <FileText className="h-8 w-8 text-white" />
+              </div>
               <h3 className="text-lg font-medium">No active plans</h3>
               <p className="text-sm text-muted-foreground mt-1">
                 {searchTerm
@@ -319,7 +322,7 @@ const PlansPage = () => {
               </p>
               <Dialog>
                 <DialogTrigger asChild>
-                  <Button className="mt-4 bg-fitness-600 hover:bg-fitness-700">
+                  <Button className="mt-4" variant="fitness">
                     <Plus className="mr-2 h-4 w-4" />
                     Enroll in Training Plan
                   </Button>
@@ -334,7 +337,7 @@ const PlansPage = () => {
                   <div className="grid gap-4 py-4">
                     {availablePlans.length > 0 ? (
                       availablePlans.map((plan) => (
-                        <Card key={plan.uuid} className="overflow-hidden">
+                        <Card key={plan.uuid} className="fitness-card border-2 border-fitness-200/50 shadow-lg hover:border-fitness-500/50 transition-all duration-200 overflow-hidden">
                           <CardHeader className="pb-2">
                             <div className="flex justify-between items-start">
                               <CardTitle className="text-lg">
@@ -342,7 +345,7 @@ const PlansPage = () => {
                               </CardTitle>
                               <Badge
                                 variant={plan.public ? "default" : "outline"}
-                                className={plan.public ? "bg-fitness-500" : ""}
+                                className={plan.public ? "bg-gradient-to-r from-fitness-600 to-fitness-700 hover:from-fitness-700 hover:to-fitness-800 text-white" : "border-fitness-200/50"}
                               >
                                 {plan.public ? "Public" : "Private"}
                               </Badge>
@@ -359,6 +362,7 @@ const PlansPage = () => {
                               onClick={() => handleEnrollInPlan(plan.uuid)}
                               disabled={enrollLoading}
                               size="sm"
+                              className="bg-gradient-to-r from-fitness-600 to-fitness-700 hover:from-fitness-700 hover:to-fitness-800 text-white font-semibold shadow-lg transition-all duration-200 disabled:opacity-50"
                             >
                               Enroll
                             </Button>

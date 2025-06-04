@@ -10,6 +10,21 @@ export default {
 		"./src/**/*.{ts,tsx}",
 	],
 	prefix: "",
+	safelist: [
+		'fitness-gradient-primary',
+		'fitness-gradient-text',
+		'fitness-icon-bg',
+		'fitness-avatar-bg',
+		'fitness-border',
+		'fitness-border-light',
+		'fitness-focus',
+		'fitness-text-primary',
+		'fitness-text-secondary',
+		'fitness-bg-primary',
+		'fitness-bg-secondary',
+		'fitness-hover-primary',
+		'fitness-user-avatar'
+	],
 	theme: {
 		container: {
 			center: true,
@@ -65,6 +80,18 @@ export default {
 					"800": "#115e59",
 					"900": "#134e4a",
 					"950": "#042f2e"
+				},
+				'fitness-primary': {
+					DEFAULT: 'hsl(var(--fitness-primary))',
+					foreground: 'hsl(var(--fitness-primary-foreground))'
+				},
+				'fitness-secondary': {
+					DEFAULT: 'hsl(var(--fitness-secondary))',
+					foreground: 'hsl(var(--fitness-secondary-foreground))'
+				},
+				'fitness-accent': {
+					DEFAULT: 'hsl(var(--fitness-accent))',
+					foreground: 'hsl(var(--fitness-accent-foreground))'
 				}
 			},
 			borderRadius: {

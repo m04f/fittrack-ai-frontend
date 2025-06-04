@@ -109,7 +109,7 @@ const ExerciseItem = ({
         </div>
       </div>
       <Button
-        variant="ghost"
+        variant="fitness-ghost"
         size="icon"
         onClick={() => onRemove(exercise.uuid)}
       >

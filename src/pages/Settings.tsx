@@ -89,23 +89,23 @@ const SettingsPage = () => {
   return (
     <div className="animate-enter space-y-6">
       <div>
-        <h1 className="text-3xl font-bold tracking-tight">Settings</h1>
+        <h1 className="text-3xl font-bold tracking-tight bg-gradient-to-r from-fitness-600 to-fitness-700 bg-clip-text text-transparent">Settings</h1>
         <p className="text-muted-foreground">
           Manage your account preferences and settings
         </p>
       </div>
 
       <Tabs defaultValue="general" className="w-full">
-        <TabsList>
-          <TabsTrigger value="general">General</TabsTrigger>
-          <TabsTrigger value="notifications">Notifications</TabsTrigger>
-          <TabsTrigger value="account">Account</TabsTrigger>
+        <TabsList className="fitness-card border border-fitness-200/50">
+          <TabsTrigger value="general" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-fitness-600 data-[state=active]:to-fitness-700 data-[state=active]:text-white">General</TabsTrigger>
+          <TabsTrigger value="notifications" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-fitness-600 data-[state=active]:to-fitness-700 data-[state=active]:text-white">Notifications</TabsTrigger>
+          <TabsTrigger value="account" className="data-[state=active]:bg-gradient-to-r data-[state=active]:from-fitness-600 data-[state=active]:to-fitness-700 data-[state=active]:text-white">Account</TabsTrigger>
         </TabsList>
 
         <TabsContent value="general" className="space-y-4 pt-4">
-          <Card>
+          <Card className="fitness-card border-2 border-fitness-200/50 shadow-lg">
             <CardHeader>
-              <CardTitle>Display Settings</CardTitle>
+              <CardTitle className="text-fitness-700 dark:text-fitness-400">Display Settings</CardTitle>
               <CardDescription>
                 Customize how the application looks and behaves
               </CardDescription>
@@ -155,9 +155,9 @@ const SettingsPage = () => {
         </TabsContent>
 
         <TabsContent value="notifications" className="space-y-4 pt-4">
-          <Card>
+          <Card className="fitness-card border-2 border-fitness-200/50 shadow-lg">
             <CardHeader>
-              <CardTitle>Notification Settings</CardTitle>
+              <CardTitle className="text-fitness-700 dark:text-fitness-400">Notification Settings</CardTitle>
               <CardDescription>
                 Control how and when you receive notifications
               </CardDescription>
@@ -239,9 +239,9 @@ const SettingsPage = () => {
         </TabsContent>
 
         <TabsContent value="account" className="space-y-4 pt-4">
-          <Card>
+          <Card className="fitness-card border-2 border-fitness-200/50 shadow-lg">
             <CardHeader>
-              <CardTitle>Change Password</CardTitle>
+              <CardTitle className="text-fitness-700 dark:text-fitness-400">Change Password</CardTitle>
               <CardDescription>Update your account password</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -260,15 +260,15 @@ const SettingsPage = () => {
                 <Input id="confirm-password" type="password" />
               </div>
 
-              <Button className="bg-fitness-600 hover:bg-fitness-700">
+              <Button variant="fitness">
                 Update Password
               </Button>
             </CardContent>
           </Card>
 
-          <Card>
+          <Card className="fitness-card border-2 border-fitness-200/50 shadow-lg">
             <CardHeader>
-              <CardTitle>Account Actions</CardTitle>
+              <CardTitle className="text-fitness-700 dark:text-fitness-400">Account Actions</CardTitle>
               <CardDescription>Manage your account status</CardDescription>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -278,7 +278,7 @@ const SettingsPage = () => {
                   This will log you out from all devices where you're currently
                   logged in
                 </p>
-                <Button variant="outline" onClick={logout}>
+                <Button variant="outline" onClick={logout} className="border-2 border-fitness-600 text-fitness-600 hover:bg-fitness-600 hover:text-white transition-all duration-200">
                   Log out from all devices
                 </Button>
               </div>

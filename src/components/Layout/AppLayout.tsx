@@ -31,15 +31,15 @@ const AppLayout = () => {
 
   return (
     <SidebarProvider>
-      <div className="min-h-screen flex w-full">
-        <Sidebar>
-          <div className="py-4">
-            <div className="px-3 py-2 flex items-center">
+      <div className="min-h-screen flex w-full fitness-gradient-bg">
+        <Sidebar className="fitness-sidebar">
+          <div className="py-6">
+            <div className="px-4 py-3 flex items-center">
               <div className="flex items-center gap-3">
-                <div className="p-2 rounded-full bg-fitness-500">
-                  <Dumbbell className="h-6 w-6 text-white" />
+                <div className="p-3 rounded-full fitness-icon-bg">
+                  <Dumbbell className="h-6 w-6 text-fitness-primary-foreground" />
                 </div>
-                <h1 className="text-xl font-bold">FitTrack AI</h1>
+                <h1 className="text-xl font-bold fitness-gradient-text">FitTrack AI</h1>
               </div>
             </div>
           </div>
@@ -68,14 +68,14 @@ const AppLayout = () => {
             <SidebarGroup className="mt-auto pb-4">
               <SidebarGroupContent>
                 <div className="p-4">
-                  <div className="flex items-center gap-3 mb-4">
-                    <Avatar>
-                      <AvatarFallback>
+                  <div className="flex items-center gap-3 mb-4 p-3 rounded-lg fitness-bg-secondary/50">
+                    <Avatar className="ring-2 ring-fitness-primary/20">
+                      <AvatarFallback className="fitness-avatar-bg">
                         {user ? getInitials(user.fullname || user.username) : "FT"}
                       </AvatarFallback>
                     </Avatar>
                     <div>
-                      <p className="font-medium">{user?.fullname || user?.username}</p>
+                      <p className="font-semibold text-sm">{user?.fullname || user?.username}</p>
                       <p className="text-xs text-muted-foreground">
                         {user?.fitness_level || "Set fitness level"}
                       </p>
@@ -83,7 +83,7 @@ const AppLayout = () => {
                   </div>
                   <Button 
                     variant="outline" 
-                    className="w-full justify-start" 
+                    className="w-full justify-start border-2 hover:fitness-border/50 transition-all duration-200" 
                     onClick={logout}
                   >
                     <LogOut className="mr-2 h-4 w-4" /> Logout
@@ -97,7 +97,7 @@ const AppLayout = () => {
         <div className="flex-1 min-h-screen">
           <div className="p-4">
             <SidebarTrigger>
-              <Button variant="outline" size="icon" className="md:hidden">
+              <Button variant="outline" size="icon" className="md:hidden border-2 hover:fitness-border/50 transition-all duration-200">
                 <svg
                   xmlns="http://www.w3.org/2000/svg"
                   width="24"
@@ -119,7 +119,9 @@ const AppLayout = () => {
           </div>
 
           <main className="container mx-auto p-4 pt-0">
-            <Outlet />
+            <div className="space-y-6">
+              <Outlet />
+            </div>
           </main>
         </div>
       </div>

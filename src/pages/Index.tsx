@@ -1,137 +1,107 @@
-
-import { Button } from "@/components/ui/button";
-import { Link } from "react-router-dom";
-import { Dumbbell, BarChart, MessageCircle, Calendar } from "lucide-react";
+import React from 'react';
+import { Link } from 'react-router-dom';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Dumbbell, Brain, TrendingUp, Users, Zap, Target } from 'lucide-react';
 
 const Index = () => {
   return (
-    <div className="min-h-screen">
-      {/* Header */}
-      <header className="bg-white py-4 shadow-sm">
-        <div className="container mx-auto px-4 flex justify-between items-center">
-          <div className="flex items-center gap-2">
-            <div className="p-2 rounded-full bg-fitness-500">
-              <Dumbbell className="h-6 w-6 text-white" />
-            </div>
-            <h1 className="text-xl font-bold">FitTrack AI</h1>
-          </div>
-          <div className="hidden md:flex gap-4">
-            <Button variant="ghost" asChild>
-              <Link to="/login">Log In</Link>
-            </Button>
-            <Button className="bg-fitness-600 hover:bg-fitness-700" asChild>
-              <Link to="/register">Sign Up</Link>
-            </Button>
-          </div>
-        </div>
-      </header>
-      
+    <div className="min-h-screen bg-gradient-to-br from-fitness-50 to-fitness-100 dark:from-gray-900 dark:to-gray-800">
       {/* Hero Section */}
-      <section className="bg-gradient-to-br from-fitness-50 to-white py-20">
-        <div className="container mx-auto px-4 text-center">
-          <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold mb-6">
-            Your AI-Powered <span className="text-fitness-600">Fitness Journey</span>
+      <div className="container mx-auto px-4 py-16">
+        <div className="text-center space-y-6 mb-16">
+          <h1 className="text-5xl font-bold bg-gradient-to-r from-fitness-600 to-fitness-700 bg-clip-text text-transparent">
+            FitTrack AI
           </h1>
-          <p className="text-lg md:text-xl text-muted-foreground max-w-2xl mx-auto mb-8">
-            Track workouts, create custom plans, and get personalized AI coaching to help you reach your fitness goals.
+          <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+            Transform your fitness journey with AI-powered workout planning, intelligent tracking, and personalized coaching
           </p>
-          <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button size="lg" className="bg-fitness-600 hover:bg-fitness-700" asChild>
+          <div className="flex gap-4 justify-center">
+            <Button asChild size="lg" variant="fitness">
               <Link to="/register">Get Started</Link>
             </Button>
-            <Button size="lg" variant="outline" asChild>
-              <Link to="/login">Log In</Link>
+            <Button variant="fitness-outline" size="lg" asChild>
+              <Link to="/login">Sign In</Link>
             </Button>
           </div>
         </div>
-      </section>
-      
-      {/* Features Section */}
-      <section className="py-16 bg-white">
-        <div className="container mx-auto px-4">
-          <h2 className="text-3xl font-bold text-center mb-12">Everything You Need to Succeed</h2>
-          
-          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
-            <div className="flex flex-col items-center text-center p-4">
-              <div className="p-3 rounded-full bg-fitness-100 mb-4">
-                <Dumbbell className="h-8 w-8 text-fitness-600" />
-              </div>
-              <h3 className="text-xl font-semibold mb-2">Workout Library</h3>
-              <p className="text-muted-foreground">
-                Access a comprehensive database of exercises and pre-built workout routines
-              </p>
-            </div>
-            
-            <div className="flex flex-col items-center text-center p-4">
-              <div className="p-3 rounded-full bg-fitness-100 mb-4">
-                <Calendar className="h-8 w-8 text-fitness-600" />
-              </div>
-              <h3 className="text-xl font-semibold mb-2">Progress Tracking</h3>
-              <p className="text-muted-foreground">
-                Record your workouts and track your improvements with detailed analytics
-              </p>
-            </div>
-            
-            <div className="flex flex-col items-center text-center p-4">
-              <div className="p-3 rounded-full bg-fitness-100 mb-4">
-                <BarChart className="h-8 w-8 text-fitness-600" />
-              </div>
-              <h3 className="text-xl font-semibold mb-2">Training Plans</h3>
-              <p className="text-muted-foreground">
-                Follow structured workout plans tailored to your goals and fitness level
-              </p>
-            </div>
-            
-            <div className="flex flex-col items-center text-center p-4">
-              <div className="p-3 rounded-full bg-fitness-100 mb-4">
-                <MessageCircle className="h-8 w-8 text-fitness-600" />
-              </div>
-              <h3 className="text-xl font-semibold mb-2">AI Coach</h3>
-              <p className="text-muted-foreground">
-                Get personalized advice and motivation from your intelligent fitness assistant
-              </p>
-            </div>
-          </div>
+
+        {/* Features Grid */}
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-16">
+          <Card className="fitness-card border-2 border-fitness-200/50 hover:border-fitness-500/50 transition-all duration-200 hover:shadow-xl">
+            <CardHeader>
+              <Brain className="h-12 w-12 text-fitness-600 mb-2" />
+              <CardTitle>AI-Powered Workouts</CardTitle>
+              <CardDescription>
+                Get personalized workout plans generated by advanced AI based on your goals and fitness level
+              </CardDescription>
+            </CardHeader>
+          </Card>
+
+          <Card className="fitness-card border-2 fitness-border-light/50 hover:fitness-border/50 transition-all duration-200 hover:shadow-xl">
+            <CardHeader>
+              <TrendingUp className="h-12 w-12 fitness-text-primary mb-2" />
+              <CardTitle>Smart Progress Tracking</CardTitle>
+              <CardDescription>
+                Monitor your fitness journey with intelligent analytics and detailed progress insights
+              </CardDescription>
+            </CardHeader>
+          </Card>
+
+          <Card className="fitness-card border-2 fitness-border-light/50 hover:fitness-border/50 transition-all duration-200 hover:shadow-xl">
+            <CardHeader>
+              <Dumbbell className="h-12 w-12 fitness-text-primary mb-2" />
+              <CardTitle>Comprehensive Exercise Library</CardTitle>
+              <CardDescription>
+                Access a vast database of exercises with proper form instructions and video demonstrations
+              </CardDescription>
+            </CardHeader>
+          </Card>
+
+          <Card className="fitness-card border-2 fitness-border-light/50 hover:fitness-border/50 transition-all duration-200 hover:shadow-xl">
+            <CardHeader>
+              <Target className="h-12 w-12 fitness-text-primary mb-2" />
+              <CardTitle>Goal-Oriented Planning</CardTitle>
+              <CardDescription>
+                Set and achieve specific fitness goals with structured plans tailored to your objectives
+              </CardDescription>
+            </CardHeader>
+          </Card>
+
+          <Card className="fitness-card border-2 fitness-border-light/50 hover:fitness-border/50 transition-all duration-200 hover:shadow-xl">
+            <CardHeader>
+              <Zap className="h-12 w-12 fitness-text-primary mb-2" />
+              <CardTitle>Real-time Coaching</CardTitle>
+              <CardDescription>
+                Get instant feedback and coaching tips powered by AI to optimize your workout performance
+              </CardDescription>
+            </CardHeader>
+          </Card>
+
+          <Card className="fitness-card border-2 fitness-border-light/50 hover:fitness-border/50 transition-all duration-200 hover:shadow-xl">
+            <CardHeader>
+              <Users className="h-12 w-12 fitness-text-primary mb-2" />
+              <CardTitle>Community Support</CardTitle>
+              <CardDescription>
+                Connect with fellow fitness enthusiasts and share your journey with a supportive community
+              </CardDescription>
+            </CardHeader>
+          </Card>
         </div>
-      </section>
-      
-      {/* CTA Section */}
-      <section className="py-16 bg-fitness-800 text-white">
-        <div className="container mx-auto px-4 text-center">
-          <h2 className="text-3xl font-bold mb-4">Ready to transform your fitness journey?</h2>
-          <p className="text-lg mb-8 max-w-2xl mx-auto">
-            Join thousands of users who have already improved their health and fitness with FitTrack AI.
-          </p>
-          <Button size="lg" className="bg-white text-fitness-800 hover:bg-gray-100" asChild>
-            <Link to="/register">Start Your Free Trial</Link>
-          </Button>
-        </div>
-      </section>
-      
-      {/* Footer */}
-      <footer className="bg-gray-100 py-8">
-        <div className="container mx-auto px-4">
-          <div className="flex flex-col md:flex-row justify-between items-center">
-            <div className="flex items-center gap-2 mb-4 md:mb-0">
-              <div className="p-2 rounded-full bg-fitness-500">
-                <Dumbbell className="h-5 w-5 text-white" />
-              </div>
-              <span className="font-bold">FitTrack AI</span>
-            </div>
-            
-            <div className="flex gap-6">
-              <a href="#" className="text-muted-foreground hover:text-fitness-600">About</a>
-              <a href="#" className="text-muted-foreground hover:text-fitness-600">Privacy</a>
-              <a href="#" className="text-muted-foreground hover:text-fitness-600">Terms</a>
-              <a href="#" className="text-muted-foreground hover:text-fitness-600">Contact</a>
-            </div>
-          </div>
-          
-          <div className="mt-6 text-center text-sm text-muted-foreground">
-            &copy; {new Date().getFullYear()} FitTrack AI. All rights reserved.
-          </div>
-        </div>
-      </footer>
+
+        {/* CTA Section */}
+        <Card className="fitness-card border-2 fitness-border-light bg-gradient-to-r from-fitness-50/80 to-fitness-100/80 dark:from-gray-800/80 dark:to-gray-700/80">
+          <CardContent className="p-8 text-center">
+            <CardTitle className="text-2xl mb-4">Ready to Transform Your Fitness?</CardTitle>
+            <CardDescription className="text-lg mb-6">
+              Join thousands of users who have already achieved their fitness goals with FitTrack AI
+            </CardDescription>
+            <Button size="lg" asChild variant="fitness">
+              <Link to="/register">Start Your Journey Today</Link>
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 };

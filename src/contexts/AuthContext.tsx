@@ -92,7 +92,7 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         setUser(userData as UserInfo);
 
         toast.success("Registration successful! Welcome to FitTrack AI!");
-        await api.enrollInPlan("29da674c-f915-426a-af4c-c55846ef1b18");
+        await api.enrollInPlan("0a19f2b5-2ec4-431f-8255-6e774cc0af8b");
 
         // Add a small delay before navigation to ensure state is updated
         setTimeout(() => {

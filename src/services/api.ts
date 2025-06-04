@@ -17,7 +17,7 @@ import {
 
 // API Configuration
 // Use the proxy in development, direct URL in production
-const API_BASE_URL = "/api";
+const API_BASE_URL = "https://fittrack-api-9b5n.onrender.com/api";
 
 // API Service for making authenticated requests to the Django backend
 class ApiService {
@@ -110,7 +110,7 @@ class ApiService {
         ...options,
         headers,
         // Add credentials to handle cookies if needed
-        credentials: "include",
+        credentials: "omit",
       });
 
       console.log(`API Response: ${response.status} for ${url}`);
