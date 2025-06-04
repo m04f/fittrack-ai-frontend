@@ -16,12 +16,18 @@ import {
   Sparkles,
   Calendar,
   Utensils,
+  ChevronDown,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import api from "@/services/api";
 import { ChatSession, DetailedChatSession, Message } from "@/types/api";
 import { toast } from "sonner";
 import { format } from "date-fns";
+import ReactMarkdown from "react-markdown";
+import { Prism as SyntaxHighlighter } from "react-syntax-highlighter";
+import { oneDark } from "react-syntax-highlighter/dist/esm/styles/prism";
+import remarkGfm from "remark-gfm";
+import rehypeRaw from "rehype-raw";
 
 const Chat = () => {
   const { user } = useAuth();
@@ -33,8 +39,25 @@ const Chat = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [isConnected, setIsConnected] = useState(false);
   const [loadingSessions, setLoadingSessions] = useState(true);
+  const [showScrollButton, setShowScrollButton] = useState(false);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
+
+  // Reusable scroll to bottom function
+  const scrollToBottom = () => {
+    if (scrollAreaRef.current) {
+      const scrollElement = scrollAreaRef.current.querySelector(
+        "[data-radix-scroll-area-viewport]",
+      );
+      if (scrollElement) {
+        // Use smooth scrolling behavior
+        scrollElement.scrollTo({
+          top: scrollElement.scrollHeight,
+          behavior: 'smooth'
+        });
+      }
+    }
+  };
 
   const preWrittenPrompts = [
     {
@@ -67,15 +90,44 @@ const Chat = () => {
 
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
-    if (scrollAreaRef.current) {
-      const scrollElement = scrollAreaRef.current.querySelector(
-        "[data-radix-scroll-area-viewport]",
-      );
-      if (scrollElement) {
-        scrollElement.scrollTop = scrollElement.scrollHeight;
-      }
-    }
+    // Add a small delay to ensure DOM has been updated
+    const timeoutId = setTimeout(scrollToBottom, 100);
+    
+    return () => clearTimeout(timeoutId);
   }, [messages]);
+
+  // Auto-scroll when loading state changes (typing indicator appears/disappears)
+  useEffect(() => {
+    if (isLoading) {
+      // Small delay for loading indicator to appear
+      const timeoutId = setTimeout(scrollToBottom, 150);
+      return () => clearTimeout(timeoutId);
+    }
+  }, [isLoading]);
+
+  // Check if user has scrolled up to show scroll-to-bottom button
+  useEffect(() => {
+    const handleScroll = () => {
+      if (scrollAreaRef.current) {
+        const scrollElement = scrollAreaRef.current.querySelector(
+          "[data-radix-scroll-area-viewport]",
+        );
+        if (scrollElement) {
+          const { scrollTop, scrollHeight, clientHeight } = scrollElement;
+          const isAtBottom = scrollTop + clientHeight >= scrollHeight - 50; // 50px threshold
+          setShowScrollButton(!isAtBottom && messages.length > 0);
+        }
+      }
+    };
+
+    const scrollElement = scrollAreaRef.current?.querySelector(
+      "[data-radix-scroll-area-viewport]",
+    );
+    if (scrollElement) {
+      scrollElement.addEventListener('scroll', handleScroll);
+      return () => scrollElement.removeEventListener('scroll', handleScroll);
+    }
+  }, [messages.length]);
 
   const fetchChatSessions = async () => {
     try {
@@ -171,6 +223,9 @@ const Chat = () => {
         return;
       }
       api.sendWebSocketMessage(message);
+      
+      // Scroll to bottom after sending message
+      setTimeout(scrollToBottom, 100);
     } catch (error) {
       console.error("Error sending message:", error);
       toast.error("Failed to send message");
@@ -376,7 +431,7 @@ const Chat = () => {
               <Separator className="flex-shrink-0" />
 
               {/* Messages Area */}
-              <CardContent className="flex-1 p-0 overflow-hidden">
+              <CardContent className="flex-1 p-0 overflow-hidden relative">
                 <ScrollArea ref={scrollAreaRef} className="h-full p-4">
                   {messages.length === 0 ? (
                     <div className="text-center text-muted-foreground py-8">
@@ -406,9 +461,131 @@ const Chat = () => {
                                 : "bg-muted"
                             }`}
                           >
-                            <p className="text-sm whitespace-pre-wrap">
-                              {message.content}
-                            </p>
+                            {message.role === "user" ? (
+                              <p className="text-sm whitespace-pre-wrap">
+                                {message.content}
+                              </p>
+                            ) : (
+                              <div className="text-sm prose prose-sm dark:prose-invert max-w-none prose-p:my-2 prose-ul:my-2 prose-ol:my-2 prose-li:my-1 prose-headings:my-2 prose-code:text-fitness-600 prose-pre:bg-slate-900 prose-pre:text-slate-100">
+                                <ReactMarkdown
+                                  remarkPlugins={[remarkGfm]}
+                                  rehypePlugins={[rehypeRaw]}
+                                  components={{
+                                    code({ node, inline, className, children, ...props }) {
+                                      const match = /language-(\w+)/.exec(className || '');
+                                      return !inline && match ? (
+                                        <SyntaxHighlighter
+                                          style={oneDark}
+                                          language={match[1]}
+                                          PreTag="div"
+                                          className="rounded-md text-sm"
+                                          {...props}
+                                        >
+                                          {String(children).replace(/\n$/, '')}
+                                        </SyntaxHighlighter>
+                                      ) : (
+                                        <code className={`${className} bg-slate-100 dark:bg-slate-800 px-1 py-0.5 rounded text-sm`} {...props}>
+                                          {children}
+                                        </code>
+                                      );
+                                    },
+                                    blockquote({ children }) {
+                                      return (
+                                        <blockquote className="border-l-4 border-fitness-400 pl-4 my-2 italic text-slate-600 dark:text-slate-400">
+                                          {children}
+                                        </blockquote>
+                                      );
+                                    },
+                                    table({ children }) {
+                                      return (
+                                        <div className="overflow-x-auto my-2">
+                                          <table className="min-w-full border-collapse border border-slate-300 dark:border-slate-600">
+                                            {children}
+                                          </table>
+                                        </div>
+                                      );
+                                    },
+                                    th({ children }) {
+                                      return (
+                                        <th className="border border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-800 px-3 py-2 text-left font-semibold">
+                                          {children}
+                                        </th>
+                                      );
+                                    },
+                                    td({ children }) {
+                                      return (
+                                        <td className="border border-slate-300 dark:border-slate-600 px-3 py-2">
+                                          {children}
+                                        </td>
+                                      );
+                                    },
+                                    ul({ children }) {
+                                      return (
+                                        <ul className="list-disc list-inside my-2 space-y-1">
+                                          {children}
+                                        </ul>
+                                      );
+                                    },
+                                    ol({ children }) {
+                                      return (
+                                        <ol className="list-decimal list-inside my-2 space-y-1">
+                                          {children}
+                                        </ol>
+                                      );
+                                    },
+                                    h1({ children }) {
+                                      return (
+                                        <h1 className="text-xl font-bold my-3 fitness-gradient-text">
+                                          {children}
+                                        </h1>
+                                      );
+                                    },
+                                    h2({ children }) {
+                                      return (
+                                        <h2 className="text-lg font-semibold my-2 fitness-text-primary">
+                                          {children}
+                                        </h2>
+                                      );
+                                    },
+                                    h3({ children }) {
+                                      return (
+                                        <h3 className="text-base font-semibold my-2 fitness-text-primary">
+                                          {children}
+                                        </h3>
+                                      );
+                                    },
+                                    strong({ children }) {
+                                      return (
+                                        <strong className="font-semibold text-fitness-700 dark:text-fitness-300">
+                                          {children}
+                                        </strong>
+                                      );
+                                    },
+                                    em({ children }) {
+                                      return (
+                                        <em className="italic text-slate-600 dark:text-slate-400">
+                                          {children}
+                                        </em>
+                                      );
+                                    },
+                                    a({ href, children }) {
+                                      return (
+                                        <a
+                                          href={href}
+                                          target="_blank"
+                                          rel="noopener noreferrer"
+                                          className="text-fitness-600 hover:text-fitness-700 dark:text-fitness-400 dark:hover:text-fitness-300 underline"
+                                        >
+                                          {children}
+                                        </a>
+                                      );
+                                    },
+                                  }}
+                                >
+                                  {message.content}
+                                </ReactMarkdown>
+                              </div>
+                            )}
                             <p className="text-xs opacity-70 mt-1">
                               {format(new Date(message.timestamp), "HH:mm")}
                             </p>
@@ -437,6 +614,18 @@ const Chat = () => {
                     </div>
                   )}
                 </ScrollArea>
+                
+                {/* Scroll to bottom button */}
+                {showScrollButton && (
+                  <Button
+                    onClick={scrollToBottom}
+                    className="absolute bottom-4 right-4 z-10 h-10 w-10 rounded-full shadow-lg"
+                    variant="fitness"
+                    size="sm"
+                  >
+                    <ChevronDown className="h-4 w-4" />
+                  </Button>
+                )}
               </CardContent>
 
               <Separator className="flex-shrink-0" />
