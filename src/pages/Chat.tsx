@@ -4,7 +4,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { Separator } from "@/components/ui/separator";
-import { Badge } from "@/components/ui/badge";
 import { Skeleton } from "@/components/ui/skeleton";
 import {
   MessageCircle,
@@ -18,7 +17,6 @@ import {
   Utensils,
   ChevronDown,
 } from "lucide-react";
-import { useAuth } from "@/contexts/AuthContext";
 import api from "@/services/api";
 import { ChatSession, DetailedChatSession, Message } from "@/types/api";
 import { toast } from "sonner";
@@ -30,14 +28,11 @@ import remarkGfm from "remark-gfm";
 import rehypeRaw from "rehype-raw";
 
 const Chat = () => {
-  const { user } = useAuth();
   const [sessions, setSessions] = useState<ChatSession[]>([]);
   const [currentSession, setCurrentSession] =
     useState<DetailedChatSession | null>(null);
   const [messages, setMessages] = useState<Message[]>([]);
   const [inputMessage, setInputMessage] = useState("");
-  const [isLoading, setIsLoading] = useState(false);
-  const [isConnected, setIsConnected] = useState(false);
   const [loadingSessions, setLoadingSessions] = useState(true);
   const [showScrollButton, setShowScrollButton] = useState(false);
   const scrollAreaRef = useRef<HTMLDivElement>(null);
@@ -96,15 +91,6 @@ const Chat = () => {
     return () => clearTimeout(timeoutId);
   }, [messages]);
 
-  // Auto-scroll when loading state changes (typing indicator appears/disappears)
-  useEffect(() => {
-    if (isLoading) {
-      // Small delay for loading indicator to appear
-      const timeoutId = setTimeout(scrollToBottom, 150);
-      return () => clearTimeout(timeoutId);
-    }
-  }, [isLoading]);
-
   // Check if user has scrolled up to show scroll-to-bottom button
   useEffect(() => {
     const handleScroll = () => {
@@ -156,51 +142,14 @@ const Chat = () => {
 
   const openSession = async (sessionUuid: string) => {
     try {
-      setIsLoading(true);
       const sessionData = await api.getChatSession(sessionUuid);
       setCurrentSession(sessionData);
       setMessages(sessionData.messages || []);
 
-      // Connect WebSocket for this session
-      connectWebSocket(sessionUuid);
     } catch (error) {
       console.error("Error opening chat session:", error);
       toast.error("Failed to open chat session");
-    } finally {
-      setIsLoading(false);
     }
-  };
-
-  const connectWebSocket = (sessionId: string) => {
-    api.connectWebSocket(
-      sessionId,
-      (data) => {
-        if (data.message && data.role) {
-          const newMessage: Message = {
-            id: Date.now(),
-            content: data.message,
-            role: data.role,
-            timestamp: new Date().toISOString(),
-          };
-          setMessages((prev) => [...prev, newMessage]);
-          setIsLoading(false);
-        }
-      },
-      (error) => {
-        console.error("WebSocket error:", error);
-        setIsConnected(false);
-        setIsLoading(false);
-        toast.error("Connection lost. Please try again.");
-      },
-      () => {
-        console.log("WebSocket closed");
-        setIsConnected(false);
-        setIsLoading(false);
-      },
-    );
-
-    // Set connected to true immediately, will be updated by callbacks if connection fails
-    setIsConnected(true);
   };
 
   const sendMessage = async (message: string) => {
@@ -214,22 +163,17 @@ const Chat = () => {
     };
 
     setInputMessage("");
-    setIsLoading(true);
+
+    // Scroll to bottom after sending message
+    setTimeout(scrollToBottom, 100);
 
     try {
-      if (!isConnected) {
-        toast.error("Not connected to chat service");
-        setIsLoading(false);
-        return;
-      }
-      api.sendWebSocketMessage(message);
-      
-      // Scroll to bottom after sending message
-      setTimeout(scrollToBottom, 100);
-    } catch (error) {
+        setMessages((prev) => [...prev, userMessage]);
+        const response = await api.sendChatMessage(currentSession.uuid, userMessage)
+        setMessages((prev) => [...prev, response]);
+      } catch (error) {
       console.error("Error sending message:", error);
       toast.error("Failed to send message");
-      setIsLoading(false);
     }
   };
 
@@ -241,8 +185,6 @@ const Chat = () => {
       if (currentSession?.uuid === sessionUuid) {
         setCurrentSession(null);
         setMessages([]);
-        api.closeWebSocket();
-        setIsConnected(false);
       }
 
       toast.success("Chat session deleted");
@@ -408,24 +350,10 @@ const Chat = () => {
             <>
               {/* Chat Header */}
               <CardHeader className="pb-3 flex-shrink-0">
-                <div className="flex items-center justify-between">
                   <CardTitle className="flex items-center gap-2 fitness-text-primary">
                     <Bot className="h-5 w-5 fitness-text-primary" />
                     {currentSession.title}
                   </CardTitle>
-                  <div className="flex items-center gap-2">
-                    <Badge
-                      variant={isConnected ? "default" : "destructive"}
-                      className={
-                        isConnected
-                          ? "bg-fitness-primary text-fitness-primary-foreground"
-                          : ""
-                      }
-                    >
-                      {isConnected ? "Connected" : "Disconnected"}
-                    </Badge>
-                  </div>
-                </div>
               </CardHeader>
 
               <Separator className="flex-shrink-0" />
@@ -597,20 +525,6 @@ const Chat = () => {
                           )}
                         </div>
                       ))}
-                      {isLoading && (
-                        <div className="flex gap-3 justify-start">
-                          <div className="w-8 h-8 rounded-full fitness-icon-bg flex items-center justify-center flex-shrink-0 shadow-md">
-                            <Bot className="h-4 w-4 text-fitness-primary-foreground" />
-                          </div>
-                          <div className="bg-muted rounded-lg p-3">
-                            <div className="flex space-x-1">
-                              <div className="w-2 h-2 rounded-full bg-muted-foreground animate-bounce"></div>
-                              <div className="w-2 h-2 rounded-full bg-muted-foreground animate-bounce [animation-delay:0.1s]"></div>
-                              <div className="w-2 h-2 rounded-full bg-muted-foreground animate-bounce [animation-delay:0.2s]"></div>
-                            </div>
-                          </div>
-                        </div>
-                      )}
                     </div>
                   )}
                 </ScrollArea>
@@ -639,23 +553,17 @@ const Chat = () => {
                     onChange={(e) => setInputMessage(e.target.value)}
                     onKeyPress={handleKeyPress}
                     placeholder="Type your message..."
-                    disabled={!isConnected || isLoading}
                     className="flex-1"
                   />
                   <Button
                     onClick={() => sendMessage(inputMessage)}
-                    disabled={!inputMessage.trim() || !isConnected || isLoading}
+                    disabled={!inputMessage.trim()}
                     size="sm"
                     variant="fitness"
                   >
                     <Send className="h-4 w-4" />
                   </Button>
                 </div>
-                {!isConnected && (
-                  <p className="text-sm text-muted-foreground mt-2">
-                    Connecting to chat service...
-                  </p>
-                )}
               </CardContent>
             </>
           )}

@@ -12,12 +12,12 @@ import {
   UpdateWorkoutRecordPayload,
   UserPlan,
   UserPlanWorkout,
-  PlanWorkout,
+  PlanWorkout, Message,
 } from "@/types/api";
 
 // API Configuration
 // Use the proxy in development, direct URL in production
-const API_BASE_URL = "https://fittrack-api-9b5n.onrender.com/api";
+const API_BASE_URL = "https://fit-track-ai.vercel.app/api";
 
 // API Service for making authenticated requests to the Django backend
 class ApiService {
@@ -39,7 +39,7 @@ class ApiService {
       this.ws.close();
     }
     this.ws = new WebSocket(
-      `wss://fittrack-api-9b5n.onrender.com/ws/chat/sessions/${sessionId}/`,
+      `wss://fit-track-ai.vercel.app/ws/chat/sessions/${sessionId}/`,
     );
 
     this.ws.onopen = () => {
@@ -336,6 +336,16 @@ class ApiService {
   async deleteChatSession(uuid: string) {
     return this.request<void>(`/chat/sessions/${uuid}/`, {
       method: "DELETE",
+    });
+  }
+
+  async sendChatMessage(sessionId: string, message: Message) {
+    return this.request<Message>(`/chat/sessions/${sessionId}/messages/`, {
+      method: "POST",
+      body: JSON.stringify({
+        role: message.role,
+        content: message.content,
+      }),
     });
   }
 }
