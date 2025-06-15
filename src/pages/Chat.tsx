@@ -48,7 +48,7 @@ const Chat = () => {
         // Use smooth scrolling behavior
         scrollElement.scrollTo({
           top: scrollElement.scrollHeight,
-          behavior: 'smooth'
+          behavior: "smooth",
         });
       }
     }
@@ -87,7 +87,7 @@ const Chat = () => {
   useEffect(() => {
     // Add a small delay to ensure DOM has been updated
     const timeoutId = setTimeout(scrollToBottom, 100);
-    
+
     return () => clearTimeout(timeoutId);
   }, [messages]);
 
@@ -110,8 +110,8 @@ const Chat = () => {
       "[data-radix-scroll-area-viewport]",
     );
     if (scrollElement) {
-      scrollElement.addEventListener('scroll', handleScroll);
-      return () => scrollElement.removeEventListener('scroll', handleScroll);
+      scrollElement.addEventListener("scroll", handleScroll);
+      return () => scrollElement.removeEventListener("scroll", handleScroll);
     }
   }, [messages.length]);
 
@@ -145,7 +145,6 @@ const Chat = () => {
       const sessionData = await api.getChatSession(sessionUuid);
       setCurrentSession(sessionData);
       setMessages(sessionData.messages || []);
-
     } catch (error) {
       console.error("Error opening chat session:", error);
       toast.error("Failed to open chat session");
@@ -168,10 +167,13 @@ const Chat = () => {
     setTimeout(scrollToBottom, 100);
 
     try {
-        setMessages((prev) => [...prev, userMessage]);
-        const response = await api.sendChatMessage(currentSession.uuid, userMessage)
-        setMessages((prev) => [...prev, response]);
-      } catch (error) {
+      setMessages((prev) => [...prev, userMessage]);
+      const response = await api.sendChatMessage(
+        currentSession.uuid,
+        userMessage,
+      );
+      setMessages((prev) => [...prev, response]);
+    } catch (error) {
       console.error("Error sending message:", error);
       toast.error("Failed to send message");
     }
@@ -201,7 +203,7 @@ const Chat = () => {
       setTimeout(() => {
         setInputMessage(prompt);
         inputRef.current?.focus();
-      }, 1000);
+      }, 100);
     } else {
       setInputMessage(prompt);
       inputRef.current?.focus();
@@ -350,10 +352,10 @@ const Chat = () => {
             <>
               {/* Chat Header */}
               <CardHeader className="pb-3 flex-shrink-0">
-                  <CardTitle className="flex items-center gap-2 fitness-text-primary">
-                    <Bot className="h-5 w-5 fitness-text-primary" />
-                    {currentSession.title}
-                  </CardTitle>
+                <CardTitle className="flex items-center gap-2 fitness-text-primary">
+                  <Bot className="h-5 w-5 fitness-text-primary" />
+                  {currentSession.title}
+                </CardTitle>
               </CardHeader>
 
               <Separator className="flex-shrink-0" />
@@ -399,8 +401,16 @@ const Chat = () => {
                                   remarkPlugins={[remarkGfm]}
                                   rehypePlugins={[rehypeRaw]}
                                   components={{
-                                    code({ node, inline, className, children, ...props }) {
-                                      const match = /language-(\w+)/.exec(className || '');
+                                    code({
+                                      node,
+                                      inline,
+                                      className,
+                                      children,
+                                      ...props
+                                    }) {
+                                      const match = /language-(\w+)/.exec(
+                                        className || "",
+                                      );
                                       return !inline && match ? (
                                         <SyntaxHighlighter
                                           style={oneDark}
@@ -409,10 +419,13 @@ const Chat = () => {
                                           className="rounded-md text-sm"
                                           {...props}
                                         >
-                                          {String(children).replace(/\n$/, '')}
+                                          {String(children).replace(/\n$/, "")}
                                         </SyntaxHighlighter>
                                       ) : (
-                                        <code className={`${className} bg-slate-100 dark:bg-slate-800 px-1 py-0.5 rounded text-sm`} {...props}>
+                                        <code
+                                          className={`${className} bg-slate-100 dark:bg-slate-800 px-1 py-0.5 rounded text-sm`}
+                                          {...props}
+                                        >
                                           {children}
                                         </code>
                                       );
@@ -528,7 +541,7 @@ const Chat = () => {
                     </div>
                   )}
                 </ScrollArea>
-                
+
                 {/* Scroll to bottom button */}
                 {showScrollButton && (
                   <Button
