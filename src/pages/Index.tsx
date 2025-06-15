@@ -1,10 +1,38 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Dumbbell, Brain, TrendingUp, Users, Zap, Target } from 'lucide-react';
+import { useAuth } from '@/contexts/AuthContext';
+import { toast } from 'sonner';
 
 const Index = () => {
+  const { register, login } = useAuth();
+  const [isCreatingDemo, setIsCreatingDemo] = useState(false);
+
+  const createDemoAccount = async () => {
+    if (isCreatingDemo) return;
+    
+    setIsCreatingDemo(true);
+    
+    try {
+      // Generate random 6-digit number for username
+      const randomNumber = Math.floor(100000 + Math.random() * 900000);
+      const demoUsername = `john-doe-${randomNumber}`;
+      const demoPassword = 'abcABC123!@#';
+      const demoEmail = `${demoUsername}@demo.fittrack.ai`;
+      
+      // Create demo account and auto-login
+      await register(demoUsername, demoEmail, demoPassword);
+      toast.success('Demo account created! Welcome to FitTrack AI!');
+    } catch (error) {
+      console.error('Demo account creation failed:', error);
+      toast.error('Failed to create demo account. Please try again.');
+    } finally {
+      setIsCreatingDemo(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-fitness-50 to-fitness-100 dark:from-gray-900 dark:to-gray-800">
       {/* Hero Section */}
@@ -17,8 +45,13 @@ const Index = () => {
             Transform your fitness journey with AI-powered workout planning, intelligent tracking, and personalized coaching
           </p>
           <div className="flex gap-4 justify-center">
-            <Button asChild size="lg" variant="fitness">
-              <Link to="/register">Get Started</Link>
+            <Button 
+              size="lg" 
+              variant="fitness" 
+              onClick={createDemoAccount}
+              disabled={isCreatingDemo}
+            >
+              {isCreatingDemo ? 'Creating Demo Account...' : 'Get Started'}
             </Button>
             <Button variant="fitness-outline" size="lg" asChild>
               <Link to="/login">Sign In</Link>
@@ -96,8 +129,13 @@ const Index = () => {
             <CardDescription className="text-lg mb-6">
               Join thousands of users who have already achieved their fitness goals with FitTrack AI
             </CardDescription>
-            <Button size="lg" asChild variant="fitness">
-              <Link to="/register">Start Your Journey Today</Link>
+            <Button 
+              size="lg" 
+              variant="fitness"
+              onClick={createDemoAccount}
+              disabled={isCreatingDemo}
+            >
+              {isCreatingDemo ? 'Creating Demo Account...' : 'Start Your Journey Today'}
             </Button>
           </CardContent>
         </Card>

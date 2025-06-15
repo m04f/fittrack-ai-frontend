@@ -12,7 +12,8 @@ import {
   UpdateWorkoutRecordPayload,
   UserPlan,
   UserPlanWorkout,
-  PlanWorkout, Message,
+  PlanWorkout,
+  Message,
 } from "@/types/api";
 
 // API Configuration
